@@ -1,0 +1,8 @@
+Librerie incluse offline in Sinapsi (nessuna dipendenza da CDN)
+--------------------------------------------------------------
+bootstrap              5.3.8   MIT       css/bootstrap.min.css, js/bootstrap.bundle.min.js
+fontawesome-free       6.7.2   CC BY 4.0 / OFL / MIT   css/all.min.css + webfonts/
+vis-network            10.1.2  MIT/Apache-2.0  vis-network.min.js (standalone) + vis-network.min.css
+vis-timeline           8.5.4   MIT/Apache-2.0  vis-timeline-graph2d.min.js (standalone) + css
+fuse.js                7.5.0   Apache-2.0  fuse.esm.min.js (modulo ES)
+marked                 18.0.14 MIT       marked.esm.js (modulo ES)

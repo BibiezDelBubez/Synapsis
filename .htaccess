@@ -1,0 +1,9 @@
+# Se la radice del sito punta alla cartella del progetto (es. http://localhost/Synapsis/
+# oppure un virtual host sulla cartella principale), tutto viene inoltrato a /public.
+# In questo modo app/, config/, database/ e storage/ non sono mai raggiungibili dal browser.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
