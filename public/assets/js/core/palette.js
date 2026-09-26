@@ -149,9 +149,9 @@ function renderList(noCase) {
     list.replaceChildren(...nodes);
 }
 
-/** Entità creabili al volo: quelle con un modulo archivio attivo, nell'ordine del menu. */
+/** Entità creabili al volo: moduli con quick_create in config/modules.php, nell'ordine del menu. */
 function creatableEntities() {
-    return router.modules.filter((m) => m.view === 'entity-table').map((m) => m.entity);
+    return router.modules.filter((m) => m.quick_create).map((m) => m.entity);
 }
 
 async function quickCreate(schema, text) {

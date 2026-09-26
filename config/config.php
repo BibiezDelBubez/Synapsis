@@ -6,7 +6,7 @@
 return [
     'app' => [
         'name'     => 'Sinapsi',
-        'version'  => '0.6.0',
+        'version'  => '0.7.0',
         'debug'    => true,              // false = messaggi d'errore generici
         'timezone' => 'Europe/Rome',
         'locale'   => 'it',

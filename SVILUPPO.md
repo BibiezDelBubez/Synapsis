@@ -1,6 +1,6 @@
 # Sinapsi — stato dello sviluppo
 
-Ultimo aggiornamento: 26/09/2026 · versione **0.6.0** · completati gli **step 1–6** su 14.
+Ultimo aggiornamento: 26/09/2026 · versione **0.7.0** · completati gli **step 1–7** su 14.
 
 ## Regole di lavoro concordate con l'utente
 
@@ -8,7 +8,8 @@ Ultimo aggiornamento: 26/09/2026 · versione **0.6.0** · completati gli **step 
 - **Niente zip/tgz né file mandati in chat.** I file si scrivono **direttamente** nella cartella del progetto sul PC:
   `C:\Users\miche\OneDrive\Documenti\xampp\htdocs\Synapsis` (XAMPP, Apache attivo, URL `http://localhost/Synapsis/`).
   Metodo: sviluppo e test nel container → sul PC con la shell del dispositivo: file nuovi con heredoc (`cat > file <<'SINAPSI_EOF'`),
-  file modificati con `patch -p1 -l` (diff) → verifica con `md5sum` contro il container.
+  file modificati con `git apply` (diff) → verifica con `md5sum` dell'intero albero contro il container.
+  **Ogni comando della shell del PC deve stare sotto ~10 KB** (limite di Windows, errore E2BIG): file grandi a blocchi con `cat >>`.
 - La cartella del PC è un repository git collegato a `https://github.com/BibiezDelBubez/Synapsis` (privato).
   A fine step preparo il commit sul PC; l'utente fa `git push` (Claude non ha accesso diretto al repository).
 - Non fare cose non richieste. Risposte in italiano, concise.
@@ -19,7 +20,7 @@ Ultimo aggiornamento: 26/09/2026 · versione **0.6.0** · completati gli **step 
   `.htaccess` in radice inoltra tutto a `public/`. Base path calcolato da solo (funziona in sottocartella).
 - Frontend: SPA in JavaScript nativo (moduli ES, nessuna build). Bootstrap 5.3.8, FontAwesome 6.7.2,
   vis-network 10.1.2, vis-timeline 8.5.4, Fuse.js 7.5.0 (`vendor/fuse/fuse.esm.min.js`), marked 18 — tutto in `public/vendor/`.
-- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership).
+- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership, 005_events).
 
 ### Principio DRY: entità dichiarative
 
@@ -37,18 +38,19 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 
 - `Core/`: App (kernel, errori JSON/HTML), Router (`{id}` numerico), Request/Response, Controller, View, Database, Migrator,
   Config, Logger, HttpException, **Schema** (validazione/cast), **Model** (CRUD generico, ricerca, filtri, ordinamento, scope sul caso, controllo ref, `summaries()`), Settings (caso attivo).
-- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero).
+- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero), EventsModel (date obbligatorie secondo il tipo, fine ≥ inizio).
+  `Model::for()` restituisce sempre la classe dell'entità richiesta (`self`, non `static`).
 - `Controllers/Api/`: ResourceController (REST generico `/api/{entity}[/{id}]`, `?q=&campo=&sort=&dir=&limit=&offset=&case_id=`),
   SessionController (`GET /api/session`, `PUT /api/session/case`), SearchController (`GET /api/search` indice per Ctrl+K),
   SystemController (`/api/health`, `/api/modules`, `/api/schema`).
-- `config/modules.php`: registro unico dei moduli (menu, router SPA, Alt+1…9). Campi: id, label, icon, group, path, view, entity, step, enabled.
+- `config/modules.php`: registro unico dei moduli (menu, router SPA, Alt+1…9). Campi: id, label, icon, group, path, view, entity, step, enabled, quick_create (Ctrl+K "Crea come …").
 
 ### Frontend (public/assets/js/)
 
 - `core/`: api, dom (h(), emit/on con signal, confirmButton), resource (CRUD + getSchema/getSchemas), form (renderForm con `exclude`, readForm, attachSubmit, showErrors),
   format (formatValue, mappe ref), panel (pannello laterale: lettura/modifica, sezioni figlie), children (sotto-elenchi generici), modal, entity-manager (gestore in modale, usato per i Casi),
-  router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
-- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà).
+  router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, loadTimeline — catturano `window.vis` separatamente —, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
+- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione).
 - format.js: formatValue (con prefix/suffix), newLabel(schema) per "Nuovo/Nuova …".
 - `modules/cases.js`: finestra Casi (Alt+C).
 - Eventi globali: `case:changed`, `data:changed {entity, action, record}`, `panel:changed`, `route:changed`, `theme:changed`, `app:error`.
@@ -64,12 +66,14 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
    generazioni calcolate, coniugi sulla stessa riga, modalità Verità/Pubblica (V), filtro casato, trascina L genitore→figlio e U unione.
    Matrice proprietà: `ownerships` (quota %, dal/al capitolo, acquisizione, nascosta), cursore capitolo, controllo quote ≠ 100%, valore posseduto per personaggio;
    `wills` + `bequests` (lasciti) nella scheda Testamenti. Personaggi e asset mostrano le proprietà nel pannello.
+7. Doppia timeline: `events` (kind fact/hidden/false; orari verità `real_*` e creduti `perceived_*`; luogo; capitolo e modo di narrazione) + `event_participants` (ruoli, "dichiara di esserci").
+   Righe Verità/Percepito, Per personaggio (eventi simultanei), Per luogo; conflitti "stesso personaggio in due luoghi"; trascinare sposta l'orario, doppio clic crea.
+   Scheda Narrazione: grafico capitolo × ordine dei fatti, salti indietro, eventi mai raccontati.
 
-Scorciatoie: Ctrl+K, Alt+C, Alt+1…7, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , .
+Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + -
 
 ## Prossimi step
 
-- **7** Doppia timeline (vis-timeline): eventi reali vs percepiti, eventi simultanei, tempo dell'azione vs della narrazione (capitoli/flashback).
 - **8** Tempi di percorrenza (matrice luoghi) + planimetrie con pin (immagine caricata + coordinate).
 - **9** Indizi: catena di custodia (usare `children`), classificazione reale / red herring / errore.
 - **10** Matrice Chi/Cosa/Dove/Quando/Perché + registro alibi (Solido, Debole, Falso, Non verificato).

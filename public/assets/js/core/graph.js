@@ -1,18 +1,35 @@
 /**
- * Strumenti condivisi dalle viste a grafo (legami, alberi genealogici).
+ * Strumenti condivisi dalle viste a grafo e timeline (legami, alberi genealogici, doppia timeline).
  *   const { Network, DataSet } = await loadVis();
+ *   const { Timeline, DataSet } = await loadTimeline();
  *   const theme = graphTheme();                     // colori del tema attivo
  *   const link = linkMode(network, stage, onLink);  // "trascina da un nodo all'altro"
  */
 import { loadScript, loadStyle } from './assets.js';
 import { h, icon } from './dom.js';
 
-export async function loadVis() {
-    await Promise.all([
-        loadScript('vendor/vis-network/vis-network.min.js'),
-        loadStyle('vendor/vis-network/vis-network.min.css'),
-    ]);
-    return window.vis;
+/*
+ * vis-network e vis-timeline (build "standalone") si registrano entrambi come window.vis:
+ * l'oggetto va catturato subito dopo il caricamento di ciascuno, altrimenti il secondo sovrascrive il primo.
+ */
+let visNetwork = null;
+let visTimeline = null;
+
+function loadVisBundle(script, style) {
+    const lib = loadScript(script).then(() => window.vis);
+    return Promise.all([lib, loadStyle(style)]).then(([vis]) => vis);
+}
+
+/** vis-network: { Network, DataSet } */
+export function loadVis() {
+    visNetwork ??= loadVisBundle('vendor/vis-network/vis-network.min.js', 'vendor/vis-network/vis-network.min.css');
+    return visNetwork;
+}
+
+/** vis-timeline: { Timeline, DataSet } */
+export function loadTimeline() {
+    visTimeline ??= loadVisBundle('vendor/vis-timeline/vis-timeline-graph2d.min.js', 'vendor/vis-timeline/vis-timeline-graph2d.min.css');
+    return visTimeline;
 }
 
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();

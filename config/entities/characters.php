@@ -13,6 +13,7 @@ return [
     'order_by'       => ['name' => 'ASC'],
 
     'children' => [
+        ['entity' => 'event_participants', 'foreign_key' => 'character_id', 'label' => 'Eventi'],
         ['entity' => 'ownerships', 'foreign_key' => 'owner_id', 'label' => 'Beni posseduti'],
     ],
 

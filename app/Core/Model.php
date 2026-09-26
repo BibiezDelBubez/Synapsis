@@ -30,11 +30,12 @@ class Model
     }
 
     /** Istanzia il model dell'entità, specializzato se esiste App\Models\{Nome}Model. */
-    public static function for(string $entity, ?int $caseId = null): static
+    public static function for(string $entity, ?int $caseId = null): self
     {
         $schema = Schema::get($entity);
         $class = 'App\\Models\\' . str_replace(' ', '', ucwords(str_replace('_', ' ', $entity))) . 'Model';
-        return class_exists($class) ? new $class($schema, $caseId) : new static($schema, $caseId);
+        // Sempre la classe dell'entità richiesta (mai quella da cui si chiama: self, non static)
+        return class_exists($class) ? new $class($schema, $caseId) : new self($schema, $caseId);
     }
 
     /**

@@ -29,7 +29,8 @@ function resetSections() {
 
 function setOpen(open) {
     document.body.classList.toggle('panel-open', open);
-    emit('panel:changed', { entity: open ? state?.entity : null, id: open ? state?.id : null });
+    // All'apertura l'evento parte da renderRead (quando si sa quale scheda è aperta)
+    if (!open) emit('panel:changed', { entity: null, id: null });
 }
 
 function header(schema, title, subtitle, actions) {
