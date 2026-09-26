@@ -10,14 +10,16 @@
  *
  * Tastiera: L collega · F adatta · Alt+N nuovo legame · , e . capitolo precedente/successivo.
  */
-import { loadScript, loadStyle } from '../core/assets.js';
+import { chapterSlider } from '../core/chapter-slider.js';
 import { h, icon, on } from '../core/dom.js';
+import { graphTheme, linkMode, loadVis } from '../core/graph.js';
 import { hotkeys } from '../core/hotkeys.js';
 import { modal } from '../core/modal.js';
 import { panel } from '../core/panel.js';
 import { prefs } from '../core/prefs.js';
 import { getSchema, resource } from '../core/resource.js';
 import { session } from '../core/session.js';
+import { viewTabs } from '../core/tabs.js';
 import { mount as mountTable } from './entity-table.js';
 
 const SENTIMENT_COLORS = {
@@ -28,22 +30,13 @@ const SENTIMENT_COLORS = {
     enemy: '#e03131',
 };
 
-const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
 export async function mount(container, { module }) {
-    await Promise.all([
-        loadScript('vendor/vis-network/vis-network.min.js'),
-        loadStyle('vendor/vis-network/vis-network.min.css'),
-    ]);
-    const { Network, DataSet } = window.vis;
+    const { Network, DataSet } = await loadVis();
     const [relSchema, charSchema] = await Promise.all([getSchema('relations'), getSchema('characters')]);
     const typeOptions = relSchema.fields.type.options;
     const sentimentOptions = relSchema.fields.sentiment.options;
 
     const state = {
-        view: prefs.get('relations.view', 'graph'),
-        chapter: null,          // null = stato finale
-        maxChapter: 0,
         hiddenTypes: new Set(),
         showSecret: true,
         showIsolated: true,
@@ -54,48 +47,48 @@ export async function mount(container, { module }) {
 
     // --- Struttura della pagina -------------------------------------------------
     const count = h('span', { class: 'badge text-bg-secondary ms-2 fw-normal' });
-    const viewButtons = {
-        graph: h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', onclick: () => setView('graph') }, icon('fa-diagram-project', 'me-1'), 'Grafo'),
-        list: h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', onclick: () => setView('list') }, icon('fa-list', 'me-1'), 'Elenco'),
-    };
-    const linkBtn = h('button', { type: 'button', class: 'btn btn-sm btn-outline-primary', title: 'Trascina da un personaggio all\'altro (L)', onclick: () => toggleLinkMode() },
+    const linkBtn = h('button', { type: 'button', class: 'btn btn-sm btn-outline-primary', title: 'Trascina da un personaggio all\'altro (L)', onclick: () => toggleLink() },
         icon('fa-link', 'me-1'), 'Collega');
     const newBtn = h('button', { type: 'button', class: 'btn btn-sm btn-primary', title: 'Alt+N', onclick: () => createRelation() },
         icon('fa-plus', 'me-1'), 'Nuovo legame');
 
-    const slider = h('input', { type: 'range', class: 'form-range chapter-range', min: 0, max: 0, step: 1, value: 0, 'aria-label': 'Capitolo' });
-    const sliderLabel = h('span', { class: 'chapter-label' });
+    const slider = chapterSlider({ onChange: () => draw(), emptyText: 'Nessuna evoluzione: aggiungi fasi a un legame' });
     const typeChips = h('div', { class: 'chip-group' }, ...Object.entries(typeOptions).map(([key, label]) =>
         h('button', { type: 'button', class: 'chip active', dataset: { type: key }, onclick: (e) => toggleType(key, e.currentTarget) }, label)));
     const secretSwitch = switchControl('Segreti', true, (v) => { state.showSecret = v; draw(); });
     const isolatedSwitch = switchControl('Isolati', true, (v) => { state.showIsolated = v; draw(); });
 
     const canvas = h('div', { class: 'graph-canvas' });
-    const linkHint = h('div', { class: 'graph-hint', hidden: true }, icon('fa-link', 'me-2'), 'Trascina da un personaggio all\'altro · Esc annulla');
     const emptyOverlay = h('div', { class: 'graph-empty', hidden: true });
     const legend = h('div', { class: 'graph-legend' },
         ...Object.entries(sentimentOptions).map(([key, label]) => h('span', {}, h('i', { class: 'legend-line', style: `background:${SENTIMENT_COLORS[key]}` }), label)),
         h('span', {}, h('i', { class: 'legend-line legend-dashed' }), 'Segreto'),
         h('span', {}, icon('fa-arrow-right-long', 'me-1'), 'Unidirezionale'));
+    const stage = h('div', { class: 'graph-stage' }, canvas, emptyOverlay, legend);
 
     const graphView = h('div', { class: 'graph-body' },
         h('div', { class: 'graph-toolbar' },
-            h('div', { class: 'chapter-control' }, icon('fa-clock-rotate-left', 'text-body-secondary'), slider, sliderLabel),
+            slider.el,
             typeChips,
-            h('div', { class: 'd-flex gap-3 ms-auto' }, secretSwitch.el, isolatedSwitch.el)),
-        h('div', { class: 'graph-stage' }, canvas, linkHint, emptyOverlay, legend));
-    const listView = h('div', { class: 'graph-list' });
+            h('div', { class: 'd-flex gap-3 ms-auto' }, secretSwitch, isolatedSwitch)),
+        stage);
+    const graphButtons = h('div', { class: 'd-flex gap-2' },
+        h('button', { type: 'button', class: 'btn btn-sm btn-icon', title: 'Adatta alla finestra (F)', onclick: () => fit() }, icon('fa-expand')),
+        h('button', { type: 'button', class: 'btn btn-sm btn-icon', title: 'Riorganizza automaticamente', onclick: () => relayout() }, icon('fa-wand-magic-sparkles')),
+        linkBtn);
+
+    const tabs = viewTabs([
+        { id: 'graph', label: 'Grafo', icon: 'fa-diagram-project', persistent: true, render: (el) => el.append(graphView), onShow: () => network.redraw(), onHide: () => link.stop() },
+        { id: 'list', label: 'Elenco', icon: 'fa-list', render: (el) => mountTable(el, { module, embedded: true }) },
+    ], { prefKey: 'relations.view', onChange: (id) => { graphButtons.hidden = newBtn.hidden = id !== 'graph'; } });
 
     container.append(h('div', { class: 'graph-view' },
         h('section', { class: 'page-header d-flex align-items-center gap-2 flex-wrap' },
             h('h1', { class: 'h4 mb-0 me-auto' }, icon(module.icon, 'me-2 text-primary'), module.label, count),
-            h('div', { class: 'btn-group' }, viewButtons.graph, viewButtons.list),
-            h('button', { type: 'button', class: 'btn btn-sm btn-icon', title: 'Adatta alla finestra (F)', onclick: () => fit() }, icon('fa-expand')),
-            h('button', { type: 'button', class: 'btn btn-sm btn-icon', title: 'Riorganizza automaticamente', onclick: () => relayout() }, icon('fa-wand-magic-sparkles')),
-            linkBtn,
+            tabs.header,
+            graphButtons,
             newBtn),
-        graphView,
-        listView));
+        tabs.body));
 
     // --- Rete vis-network ----------------------------------------------------------
     const nodes = new DataSet();
@@ -111,15 +104,8 @@ export async function mount(container, { module }) {
         },
         nodes: { shape: 'dot', size: 16, borderWidth: 2, font: { size: 13, face: 'system-ui, sans-serif' } },
         edges: { font: { size: 11, align: 'middle', face: 'system-ui, sans-serif' }, selectionWidth: 2, hoverWidth: 1 },
-        manipulation: {
-            enabled: false,
-            addEdge: (data, callback) => {
-                callback(null); // l'arco vero arriva dal salvataggio del legame
-                setLinkMode(false);
-                if (data.from !== data.to) createRelation({ source_id: data.from, target_id: data.to });
-            },
-        },
     });
+    const link = linkMode(network, stage, (from, to) => createRelation({ source_id: from, target_id: to }));
 
     const positionsKey = () => `graph.positions.${session.activeCase?.id ?? 0}`;
     const savedPositions = () => {
@@ -158,8 +144,8 @@ export async function mount(container, { module }) {
     let needsFit = true; // adatta la vista al primo disegno e dopo il cambio di caso
 
     function draw() {
-        const fontColor = cssVar('--bs-body-color');
-        const bg = cssVar('--bs-body-bg');
+        const theme = graphTheme();
+        const chapter = slider.value;
         const rels = visibleRelations();
         const linked = new Set(rels.flatMap((r) => [r.source_id, r.target_id]));
         const positions = savedPositions();
@@ -173,10 +159,10 @@ export async function mount(container, { module }) {
                     id: c.id,
                     label: c.name,
                     title: [c.name, charSchema.fields.role.options[c.role], charSchema.fields.status.options[c.status]].filter(Boolean).join(' · '),
-                    color: { background: c.color || '#adb5bd', border: dead ? '#e03131' : cssVar('--bs-border-color'), highlight: { background: c.color || '#adb5bd', border: cssVar('--bs-primary') } },
+                    color: { background: c.color || '#adb5bd', border: dead ? '#e03131' : theme.border, highlight: { background: c.color || '#adb5bd', border: theme.primary } },
                     shapeProperties: { borderDashes: dead ? [4, 3] : false },
                     opacity: dead ? 0.65 : 1,
-                    font: { color: fontColor, strokeWidth: 3, strokeColor: bg },
+                    font: { color: theme.font, strokeWidth: 3, strokeColor: theme.bg },
                     ...(saved ? { x: saved.x, y: saved.y, physics: false } : { physics: true }),
                 };
             });
@@ -186,9 +172,9 @@ export async function mount(container, { module }) {
         const edgeData = rels.map((r) => {
             const pair = [r.source_id, r.target_id].sort().join('-');
             const n = pairCount[pair] = (pairCount[pair] ?? 0) + 1;
-            const sentiment = sentimentAt(r, state.chapter);
+            const sentiment = sentimentAt(r, chapter);
             const color = SENTIMENT_COLORS[sentiment] ?? SENTIMENT_COLORS.neutral;
-            const changed = changedAt(r, state.chapter);
+            const changed = changedAt(r, chapter);
             return {
                 id: r.id,
                 from: r.source_id,
@@ -201,7 +187,7 @@ export async function mount(container, { module }) {
                 arrows: r.directed ? { to: { enabled: true, scaleFactor: 0.7 } } : { to: { enabled: false } },
                 shadow: changed ? { enabled: true, color, size: 12, x: 0, y: 0 } : false,
                 smooth: { enabled: true, type: n % 2 ? 'curvedCW' : 'curvedCCW', roundness: 0.12 * Math.ceil(n / 2) },
-                font: { color: fontColor, strokeWidth: 3, strokeColor: bg },
+                font: { color: theme.font, strokeWidth: 3, strokeColor: theme.bg },
             };
         });
 
@@ -219,7 +205,6 @@ export async function mount(container, { module }) {
         if (nodeData.length) needsFit = false;
 
         count.textContent = String(rels.length);
-        updateSliderLabel();
         showEmpty();
     }
 
@@ -233,33 +218,6 @@ export async function mount(container, { module }) {
         linkBtn.disabled = newBtn.disabled = !session.activeCase || state.characters.length < 2;
     }
 
-    // --- Cursore capitolo -----------------------------------------------------------
-    function updateSlider() {
-        state.maxChapter = state.phases.reduce((max, p) => Math.max(max, p.chapter), 0);
-        slider.max = String(state.maxChapter);
-        slider.disabled = state.maxChapter === 0 && !state.phases.length;
-        if (state.chapter !== null && state.chapter > state.maxChapter) state.chapter = null;
-        slider.value = String(state.chapter ?? state.maxChapter);
-    }
-
-    function updateSliderLabel() {
-        if (!state.phases.length) {
-            sliderLabel.textContent = 'Nessuna evoluzione: aggiungi fasi a un legame';
-            return;
-        }
-        const ch = state.chapter ?? state.maxChapter;
-        sliderLabel.replaceChildren('Stato al capitolo ', h('strong', {}, String(ch)),
-            ...(ch === state.maxChapter ? [h('span', { class: 'text-body-tertiary ms-1' }, '(finale)')] : []));
-    }
-
-    function setChapter(value) {
-        const ch = Math.max(0, Math.min(state.maxChapter, value));
-        state.chapter = ch === state.maxChapter ? null : ch;
-        slider.value = String(ch);
-        draw();
-    }
-    slider.addEventListener('input', () => setChapter(Number(slider.value)));
-
     // --- Filtri e modalità ------------------------------------------------------------
     function toggleType(type, chip) {
         if (state.hiddenTypes.has(type)) state.hiddenTypes.delete(type);
@@ -268,18 +226,9 @@ export async function mount(container, { module }) {
         draw();
     }
 
-    let linkMode = false;
-    function setLinkMode(active) {
-        linkMode = active;
-        linkHint.hidden = !active;
-        linkBtn.classList.toggle('active', active);
-        if (active) network.addEdgeMode();
-        else network.disableEditMode();
+    function toggleLink() {
+        if (!linkBtn.disabled && tabs.current === 'graph') link.toggle('relation', linkBtn, 'Trascina da un personaggio all\'altro');
     }
-    function toggleLinkMode() {
-        if (!linkBtn.disabled && state.view === 'graph') setLinkMode(!linkMode);
-    }
-    canvas.addEventListener('keydown', (e) => { if (e.key === 'Escape' && linkMode) setLinkMode(false); });
 
     function createRelation(defaults = {}) {
         if (!session.activeCase || modal.isOpen()) return;
@@ -296,62 +245,38 @@ export async function mount(container, { module }) {
         draw();
     }
 
-    let tableCleanup = null;
-    async function setView(view) {
-        state.view = view;
-        prefs.set('relations.view', view);
-        viewButtons.graph.classList.toggle('active', view === 'graph');
-        viewButtons.list.classList.toggle('active', view === 'list');
-        graphView.hidden = view !== 'graph';
-        listView.hidden = view !== 'list';
-        linkBtn.hidden = view !== 'graph';
-        if (linkMode) setLinkMode(false);
-
-        if (view === 'list' && !tableCleanup) {
-            listView.replaceChildren();
-            tableCleanup = await mountTable(listView, { module: { ...module, label: relSchema.label_plural } });
-            listView.querySelector('.page-header')?.remove(); // l'intestazione è già quella del grafo
-        } else if (view === 'graph') {
-            tableCleanup?.();
-            tableCleanup = null;
-            network.redraw();
-        }
-    }
-
     // --- Dati -----------------------------------------------------------------------
     async function load() {
         if (!session.activeCase) {
             Object.assign(state, { characters: [], relations: [], phases: [] });
             nodes.clear();
             edges.clear();
-            updateSlider();
-            draw();
-            return;
+        } else {
+            const [chars, rels, phases] = await Promise.all([
+                resource('characters').list({ limit: 1000 }),
+                resource('relations').list({ limit: 1000 }),
+                resource('relation_phases').list({ limit: 1000, sort: 'chapter', dir: 'asc' }),
+            ]);
+            state.characters = chars.data;
+            state.relations = rels.data;
+            state.phases = phases.data;
         }
-        const [chars, rels, phases] = await Promise.all([
-            resource('characters').list({ limit: 1000 }),
-            resource('relations').list({ limit: 1000 }),
-            resource('relation_phases').list({ limit: 1000, sort: 'chapter', dir: 'asc' }),
-        ]);
-        state.characters = chars.data;
-        state.relations = rels.data;
-        state.phases = phases.data;
-        updateSlider();
+        slider.setRange(state.phases.reduce((max, p) => Math.max(max, p.chapter), 0), state.phases.length > 0);
         draw();
     }
 
     function switchControl(label, checked, onChange) {
         const input = h('input', { type: 'checkbox', class: 'form-check-input', role: 'switch', checked, onchange: () => onChange(input.checked) });
-        return { el: h('label', { class: 'form-check form-switch mb-0 small' }, input, h('span', { class: 'form-check-label' }, label)) };
+        return h('label', { class: 'form-check form-switch mb-0 small' }, input, h('span', { class: 'form-check-label' }, label));
     }
 
     const keys = [
         ['alt+n', () => createRelation(), 'Nuovo legame'],
-        ['l', () => toggleLinkMode(), 'Collega due personaggi (grafo)'],
+        ['l', () => toggleLink(), 'Collega due personaggi (grafo)'],
         ['f', () => fit(), 'Adatta il grafo alla finestra'],
-        [',', () => setChapter((state.chapter ?? state.maxChapter) - 1), 'Capitolo precedente (grafo)'],
-        ['.', () => setChapter((state.chapter ?? state.maxChapter) + 1), 'Capitolo successivo (grafo)'],
-        ['escape', () => (linkMode ? setLinkMode(false) : panel.current && !modal.isOpen() && panel.close()), 'Annulla collegamento / chiudi il pannello'],
+        [',', () => slider.step(-1), 'Capitolo precedente'],
+        ['.', () => slider.step(1), 'Capitolo successivo'],
+        ['escape', () => (link.active ? link.stop() : panel.current && !modal.isOpen() && panel.close()), 'Annulla collegamento / chiudi il pannello'],
     ];
 
     // --- Eventi ------------------------------------------------------------------------
@@ -367,12 +292,12 @@ export async function mount(container, { module }) {
     }, { signal });
 
     keys.forEach(([combo, handler, description]) => hotkeys.register(combo, handler, description));
-    await setView(state.view);
+    await tabs.start();
     await load();
 
     return () => {
         controller.abort();
-        tableCleanup?.();
+        tabs.destroy();
         network.destroy();
         keys.forEach(([combo, handler]) => hotkeys.unregister(combo, handler));
     };

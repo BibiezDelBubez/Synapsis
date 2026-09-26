@@ -1,6 +1,6 @@
 # Sinapsi — stato dello sviluppo
 
-Ultimo aggiornamento: 26/09/2026 · versione **0.5.0** · completati gli **step 1–5** su 14.
+Ultimo aggiornamento: 26/09/2026 · versione **0.6.0** · completati gli **step 1–6** su 14.
 
 ## Regole di lavoro concordate con l'utente
 
@@ -9,6 +9,8 @@ Ultimo aggiornamento: 26/09/2026 · versione **0.5.0** · completati gli **step 
   `C:\Users\miche\OneDrive\Documenti\xampp\htdocs\Synapsis` (XAMPP, Apache attivo, URL `http://localhost/Synapsis/`).
   Metodo: sviluppo e test nel container → sul PC con la shell del dispositivo: file nuovi con heredoc (`cat > file <<'SINAPSI_EOF'`),
   file modificati con `patch -p1 -l` (diff) → verifica con `md5sum` contro il container.
+- La cartella del PC è un repository git collegato a `https://github.com/BibiezDelBubez/Synapsis` (privato).
+  A fine step preparo il commit sul PC; l'utente fa `git push` (Claude non ha accesso diretto al repository).
 - Non fare cose non richieste. Risposte in italiano, concise.
 
 ## Stack e architettura
@@ -17,14 +19,16 @@ Ultimo aggiornamento: 26/09/2026 · versione **0.5.0** · completati gli **step 
   `.htaccess` in radice inoltra tutto a `public/`. Base path calcolato da solo (funziona in sottocartella).
 - Frontend: SPA in JavaScript nativo (moduli ES, nessuna build). Bootstrap 5.3.8, FontAwesome 6.7.2,
   vis-network 10.1.2, vis-timeline 8.5.4, Fuse.js 7.5.0 (`vendor/fuse/fuse.esm.min.js`), marked 18 — tutto in `public/vendor/`.
-- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (applicate: 001_init, 002_archive, 003_relations).
+- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership).
 
 ### Principio DRY: entità dichiarative
 
 Ogni entità è un file `config/entities/{nome}.php` (file che iniziano con `_` = frammenti condivisi, es. `_sentiments.php`). Chiavi:
 `table, label, label_plural, icon, title_field, subtitle_field, scoped (appartiene al caso → case_id), searchable, list_columns,
-order_by, quick_search (default true), children ([[entity, foreign_key, label]] → sotto-elenchi nel pannello), fields`.
-Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref (entity), json`; opzioni `required, default, min, max, options, rows, help, width (half|full), format (currency)`.
+order_by, quick_search (default true), children ([[entity, foreign_key, label]] → sotto-elenchi nel pannello),
+title_template (titolo calcolato nel campo virtuale `_title`, es. `'{parent_id} → {child_id}[ ({moment})]'`: ref → nomi, enum → etichette, `[ ]` opzionale),
+distinct ([campoA, campoB] devono essere diversi), gender ('f' → "Nuova …"), fields`.
+Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref (entity), json`; opzioni `required, default, min, max, options, rows, help, width (half|full), format (currency), prefix, suffix`.
 
 **Aggiungere un'entità** = file in `config/entities/` + tabella in una nuova migrazione (+ eventuale `App\Models\{Studly}Model` con hook
 `beforeSave/afterSave/afterDelete`, caricato in automatico da `Model::for()`) + voce in `config/modules.php`.
@@ -33,7 +37,7 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 
 - `Core/`: App (kernel, errori JSON/HTML), Router (`{id}` numerico), Request/Response, Controller, View, Database, Migrator,
   Config, Logger, HttpException, **Schema** (validazione/cast), **Model** (CRUD generico, ricerca, filtri, ordinamento, scope sul caso, controllo ref, `summaries()`), Settings (caso attivo).
-- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (niente legame con sé stessi, etichetta di default).
+- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero).
 - `Controllers/Api/`: ResourceController (REST generico `/api/{entity}[/{id}]`, `?q=&campo=&sort=&dir=&limit=&offset=&case_id=`),
   SessionController (`GET /api/session`, `PUT /api/session/case`), SearchController (`GET /api/search` indice per Ctrl+K),
   SystemController (`/api/health`, `/api/modules`, `/api/schema`).
@@ -43,8 +47,9 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 
 - `core/`: api, dom (h(), emit/on con signal, confirmButton), resource (CRUD + getSchema/getSchemas), form (renderForm con `exclude`, readForm, attachSubmit, showErrors),
   format (formatValue, mappe ref), panel (pannello laterale: lettura/modifica, sezioni figlie), children (sotto-elenchi generici), modal, entity-manager (gestore in modale, usato per i Casi),
-  router (SPA dal registro moduli), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
-- `views/`: dashboard, entity-table (tabella generica per qualsiasi entità), relations (grafo vis-network + vista elenco).
+  router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
+- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà).
+- format.js: formatValue (con prefix/suffix), newLabel(schema) per "Nuovo/Nuova …".
 - `modules/cases.js`: finestra Casi (Alt+C).
 - Eventi globali: `case:changed`, `data:changed {entity, action, record}`, `panel:changed`, `route:changed`, `theme:changed`, `app:error`.
 - Ogni vista esporta `mount(container, { module })` e restituisce una funzione di pulizia.
@@ -55,12 +60,15 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 2. Entità dichiarative + API generica + Casi (caso attivo).
 3. + 4. SPA, pannello di dettaglio, tabella generica, aiuto scorciatoie; Personaggi (ruolo, stato, segreto…), Luoghi (annidati), Asset (tipo, valore, dove si trova); Ctrl+K.
 5. Grafo dei legami: 11 tipi, stato (alleati→nemici) con fasi per capitolo (`relation_phases`), cursore capitolo, filtri, segreti tratteggiati, collegamento trascinando (L), posizioni salvate per caso.
+6. Alberi genealogici: `lineages` (biologica/adottiva/presunta/segreta), `unions` (matrimoni, clandestine…), personaggi con casato/nascita/morte;
+   generazioni calcolate, coniugi sulla stessa riga, modalità Verità/Pubblica (V), filtro casato, trascina L genitore→figlio e U unione.
+   Matrice proprietà: `ownerships` (quota %, dal/al capitolo, acquisizione, nascosta), cursore capitolo, controllo quote ≠ 100%, valore posseduto per personaggio;
+   `wills` + `bequests` (lasciti) nella scheda Testamenti. Personaggi e asset mostrano le proprietà nel pannello.
 
-Scorciatoie: Ctrl+K, Alt+C, Alt+1…5, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; nel grafo L, F, `,` e `.`.
+Scorciatoie: Ctrl+K, Alt+C, Alt+1…7, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , .
 
 ## Prossimi step
 
-- **6** Alberi genealogici (entità parentela padre/madre/figlio/coniuge, vista gerarchica vis-network, eredità/testamenti) + Matrice proprietà (`ownerships`: personaggio ↔ asset, quota %, da/a capitolo o data, modo di acquisizione).
 - **7** Doppia timeline (vis-timeline): eventi reali vs percepiti, eventi simultanei, tempo dell'azione vs della narrazione (capitoli/flashback).
 - **8** Tempi di percorrenza (matrice luoghi) + planimetrie con pin (immagine caricata + coordinate).
 - **9** Indizi: catena di custodia (usare `children`), classificazione reale / red herring / errore.

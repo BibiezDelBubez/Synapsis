@@ -12,6 +12,10 @@ return [
     'list_columns'   => ['name', 'type', 'value', 'location_id'],
     'order_by'       => ['name' => 'ASC'],
 
+    'children' => [
+        ['entity' => 'ownerships', 'foreign_key' => 'asset_id', 'label' => 'Proprietari'],
+    ],
+
     'fields' => [
         'name' => ['type' => 'string', 'label' => 'Nome', 'required' => true, 'max' => 150],
         'type' => [

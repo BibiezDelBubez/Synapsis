@@ -31,6 +31,9 @@ export function invalidateRefs(entity = null) {
 on('data:changed', ({ entity }) => invalidateRefs(entity));
 on('case:changed', () => invalidateRefs());
 
+/** "Nuovo personaggio" / "Nuova proprietà" secondo il genere dichiarato nello schema. */
+export const newLabel = (schema) => `${schema.gender === 'f' ? 'Nuova' : 'Nuovo'} ${schema.label.toLowerCase()}`;
+
 /** Carica le mappe dei ref usati da un insieme di campi. @returns {Promise<Object<string, Map>>} */
 export async function loadRefsFor(schema, fieldNames = Object.keys(schema.fields)) {
     const refs = {};
@@ -51,6 +54,7 @@ export function formatValue(field, value, refMap = undefined, compact = false) {
     if (value === null || value === undefined || value === '') {
         return h('span', { class: 'text-body-tertiary' }, '—');
     }
+    const affix = (text) => `${field.prefix ?? ''}${text}${field.suffix ?? ''}`;
     switch (field.type) {
         case 'enum':
             return h('span', { class: `badge badge-enum enum-${value}` }, field.options[value] ?? value);
@@ -62,9 +66,9 @@ export function formatValue(field, value, refMap = undefined, compact = false) {
             return h('span', { class: 'ref-link', dataset: { refEntity: field.entity, refId: value } },
                 refMap?.get(Number(value)) ?? `#${value}`);
         case 'float':
-            return field.format === 'currency' ? currency.format(value) : number.format(value);
+            return field.format === 'currency' ? currency.format(value) : affix(number.format(value));
         case 'int':
-            return number.format(value);
+            return affix(number.format(value));
         case 'datetime':
             return formatDateTime(value);
         case 'date':
@@ -76,6 +80,6 @@ export function formatValue(field, value, refMap = undefined, compact = false) {
                 ? h('span', { class: 'text-truncate d-inline-block', style: 'max-width:28ch' }, value)
                 : h('span', { class: 'text-prewrap' }, value);
         default:
-            return String(value);
+            return affix(String(value));
     }
 }

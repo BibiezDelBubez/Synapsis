@@ -13,6 +13,7 @@
  * ↓/↑ scorrono l'elenco, Alt+N crea un nuovo record, Esc chiude.
  */
 import { confirmButton, emit, formatDateTime, h, icon } from './dom.js';
+import { newLabel } from './format.js';
 import { attachSubmit, focusFirst, renderForm } from './form.js';
 import { modal } from './modal.js';
 import { getSchema, resource } from './resource.js';
@@ -39,7 +40,7 @@ export async function openManager(entity, options = {}) {
         h('div', { class: 'd-flex gap-2 mb-3' },
             search,
             h('button', { type: 'button', class: 'btn btn-primary text-nowrap', title: 'Alt+N', onclick: () => showForm(null) },
-                icon('fa-plus', 'me-1'), `Nuovo ${schema.label.toLowerCase()}`)),
+                icon('fa-plus', 'me-1'), newLabel(schema))),
         list);
 
     search.addEventListener('input', () => {
@@ -146,7 +147,7 @@ export async function openManager(entity, options = {}) {
             },
         });
 
-        modal.setTitle(record ? `Modifica ${schema.label.toLowerCase()}` : `Nuovo ${schema.label.toLowerCase()}`, schema.icon);
+        modal.setTitle(record ? `Modifica ${schema.label.toLowerCase()}` : newLabel(schema), schema.icon);
         modal.setBody(form);
         modal.setFooter(h('div', { class: 'd-flex w-100 align-items-center gap-2' },
             h('small', { class: 'text-body-secondary me-auto' }, 'Ctrl+Invio salva · Esc torna all\'elenco'),

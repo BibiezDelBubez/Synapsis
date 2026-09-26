@@ -79,8 +79,11 @@ export async function renderChildSection(child, parentId, signal) {
                 ? data.map((row) => {
                     const el = h('div', { class: 'child-row' },
                         h('div', { class: 'child-values' },
-                            ...columns.map((name) => h('span', { class: `child-value child-${schema.fields[name].type}`, title: schema.fields[name].label },
-                                formatValue(schema.fields[name], row[name], refs[name], true)))),
+                            ...columns.filter((name) => row[name] !== null && row[name] !== '' && row[name] !== false).map((name) => {
+                                const field = schema.fields[name];
+                                return h('span', { class: `child-value child-${field.type}`, title: field.label },
+                                    field.type === 'bool' ? h('span', { class: 'badge text-bg-secondary fw-normal' }, field.label) : formatValue(field, row[name], refs[name], true));
+                            })),
                         h('div', { class: 'child-actions' },
                             h('button', { type: 'button', class: 'btn btn-sm btn-icon', title: 'Modifica', onclick: () => openForm(row, el) }, icon('fa-pen')),
                             confirmButton({

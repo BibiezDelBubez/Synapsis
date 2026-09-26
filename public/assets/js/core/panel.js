@@ -9,7 +9,7 @@
  * Cliccando un collegamento (campo ref) si apre la scheda collegata.
  */
 import { confirmButton, emit, formatDateTime, h, icon, on } from './dom.js';
-import { formatValue, loadRefsFor } from './format.js';
+import { formatValue, loadRefsFor, newLabel } from './format.js';
 import { renderChildSection } from './children.js';
 import { attachSubmit, focusFirst, renderForm } from './form.js';
 import { hotkeys } from './hotkeys.js';
@@ -100,7 +100,7 @@ async function renderEdit(entity, record = null, defaults = {}) {
     });
 
     root().replaceChildren(
-        header(schema, record ? record[schema.title_field] : `Nuovo ${schema.label.toLowerCase()}`, null, [
+        header(schema, record ? record[schema.title_field] : newLabel(schema), null, [
             h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', onclick: cancel }, 'Annulla'),
             saveBtn,
         ]),

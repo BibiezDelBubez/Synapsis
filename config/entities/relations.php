@@ -16,6 +16,7 @@ return [
     'searchable'     => ['label', 'description'],
     'list_columns'   => ['label', 'source_id', 'target_id', 'type', 'sentiment', 'secret'],
     'order_by'       => ['label' => 'ASC'],
+    'distinct'       => ['source_id', 'target_id'],
 
     // Sezione "Evoluzione nel tempo" nel pannello di dettaglio
     'children' => [

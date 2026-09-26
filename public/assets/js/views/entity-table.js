@@ -3,10 +3,13 @@
  * Si attiva da config/modules.php con view 'entity-table' e 'entity' => nome.
  * Colonne da schema.list_columns; clic o Invio su una riga apre il pannello di dettaglio.
  *
+ * Con { embedded: true } la tabella si inserisce dentro un'altra vista (es. una scheda):
+ * niente titolo di pagina, solo la barra con ricerca e "Nuovo".
+ *
  * Tastiera: / cerca · Alt+N nuovo · ↑↓ scorrono le righe · Invio apre.
  */
 import { h, icon, on } from '../core/dom.js';
-import { formatValue, loadRefsFor } from '../core/format.js';
+import { formatValue, loadRefsFor, newLabel } from '../core/format.js';
 import { hotkeys } from '../core/hotkeys.js';
 import { modal } from '../core/modal.js';
 import { panel } from '../core/panel.js';
@@ -15,7 +18,7 @@ import { session } from '../core/session.js';
 
 const SEARCH_DELAY = 150;
 
-export async function mount(container, { module }) {
+export async function mount(container, { module, embedded = false }) {
     const schema = await getSchema(module.entity);
     const api = resource(module.entity);
     const columns = schema.list_columns;
@@ -24,15 +27,19 @@ export async function mount(container, { module }) {
     const count = h('span', { class: 'badge text-bg-secondary ms-2 fw-normal' });
     const search = h('input', { type: 'search', class: 'form-control form-control-sm', placeholder: `Cerca… ( / )`, 'aria-label': 'Cerca' });
     const newBtn = h('button', { type: 'button', class: 'btn btn-sm btn-primary text-nowrap', title: 'Alt+N', onclick: () => createNew() },
-        icon('fa-plus', 'me-1'), `Nuovo ${schema.label.toLowerCase()}`);
+        icon('fa-plus', 'me-1'), newLabel(schema));
     const thead = h('thead');
     const tbody = h('tbody');
     const body = h('div', { class: 'table-responsive entity-table-wrap' },
         h('table', { class: 'table table-sm table-hover align-middle mb-0 entity-table' }, thead, tbody));
 
+    const heading = embedded
+        ? h('div', { class: 'me-auto fw-semibold text-body-secondary' }, icon(schema.icon, 'me-2'), schema.label_plural, count)
+        : h('h1', { class: 'h4 mb-0 me-auto' }, icon(schema.icon, 'me-2 text-primary'), schema.label_plural, count);
+
     container.append(
-        h('section', { class: 'page-header d-flex align-items-center gap-2 flex-wrap' },
-            h('h1', { class: 'h4 mb-0 me-auto' }, icon(schema.icon, 'me-2 text-primary'), schema.label_plural, count),
+        h('section', { class: `${embedded ? 'table-toolbar' : 'page-header'} d-flex align-items-center gap-2 flex-wrap` },
+            heading,
             h('div', { class: 'toolbar-search' }, search),
             newBtn),
         body);
@@ -149,7 +156,7 @@ export async function mount(container, { module }) {
 
     const onNew = () => createNew();
     const onSearch = () => search.focus();
-    hotkeys.register('alt+n', onNew, `Nuovo ${schema.label.toLowerCase()}`);
+    hotkeys.register('alt+n', onNew, newLabel(schema));
     hotkeys.register('/', onSearch, 'Cerca nella tabella');
 
     await load();

@@ -2,6 +2,7 @@
  * Sinapsi — avvio dell'interfaccia: azioni, scorciatoie, comandi rapidi e router.
  */
 import { on } from './core/dom.js';
+import { newLabel } from './core/format.js';
 import { openHelp } from './core/help.js';
 import { hotkeys } from './core/hotkeys.js';
 import { modal } from './core/modal.js';
@@ -37,7 +38,7 @@ for (const module of router.modules) {
     palette.addCommand({ label: `Vai a ${module.label}`, icon: module.icon, hint: 'Vai', keywords: module.id, run: () => router.navigate(module.path) });
     if (module.view === 'entity-table') {
         getSchema(module.entity).then((schema) => palette.addCommand({
-            label: `Nuovo ${schema.label.toLowerCase()}`, icon: 'fa-plus', hint: 'Nuovo', keywords: `crea aggiungi ${module.id}`,
+            label: newLabel(schema), icon: 'fa-plus', hint: 'Nuovo', keywords: `crea aggiungi ${module.id}`,
             run: () => (session.activeCase ? panel.create(module.entity) : openCases()),
         }));
     }

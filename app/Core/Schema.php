@@ -13,9 +13,13 @@ namespace App\Core;
  *   list_columns (colonne della tabella nell'interfaccia),
  *   children ([[entity, foreign_key, label]]: sotto-elenchi mostrati nel pannello di dettaglio),
  *   quick_search (bool, default true: compare nella ricerca Ctrl+K),
+ *   title_template (titolo calcolato, es. '{parent_id} → {child_id}[ ({moment})]': i ref diventano nomi,
+ *                   gli enum etichette; le parti tra [ ] spariscono se vuote. Il titolo è nel campo virtuale _title),
+ *   distinct ([campoA, campoB]: i due campi non possono avere lo stesso valore, es. genitore ≠ figlio),
+ *   gender ('m' | 'f', default 'm': per scrivere "Nuovo personaggio" / "Nuova proprietà"),
  *   scoped (bool: appartiene a un caso → colonna case_id),
  *   searchable (campi per la ricerca testuale), order_by ([campo => ASC|DESC]),
- *   fields: [nome => [type, label, required, default, max, min, options, entity, rows, help, width, format]]
+ *   fields: [nome => [type, label, required, default, max, min, options, entity, rows, help, width, format, prefix, suffix]]
  *
  * Tipi supportati: string, text, int, float, bool, enum, date, datetime, color, ref, json
  */
@@ -38,6 +42,10 @@ final class Schema
     /** @var array<int, array{entity: string, foreign_key: string, label: string}> */
     public readonly array $children;
     public readonly bool $quickSearch;
+    public readonly ?string $titleTemplate;
+    public readonly string $gender;
+    /** @var string[] */
+    public readonly array $distinct;
     public readonly bool $scoped;
     /** @var string[] */
     public readonly array $searchable;
@@ -55,7 +63,10 @@ final class Schema
         $this->icon        = (string) ($def['icon'] ?? 'fa-cube');
         $this->scoped      = (bool) ($def['scoped'] ?? true);
         $this->fields      = self::normalizeFields($name, (array) ($def['fields'] ?? []));
-        $this->titleField  = (string) ($def['title_field'] ?? array_key_first($this->fields));
+        $this->gender      = ($def['gender'] ?? 'm') === 'f' ? 'f' : 'm';
+        $this->titleTemplate = isset($def['title_template']) ? (string) $def['title_template'] : null;
+        $this->titleField  = $this->titleTemplate !== null ? '_title' : (string) ($def['title_field'] ?? array_key_first($this->fields));
+        $this->distinct    = array_values(array_intersect((array) ($def['distinct'] ?? []), array_keys($this->fields)));
         $this->subtitleField = isset($def['subtitle_field']) && isset($this->fields[$def['subtitle_field']]) ? (string) $def['subtitle_field'] : null;
         $this->listColumns = array_values(array_intersect((array) ($def['list_columns'] ?? array_slice($this->fieldNames(), 0, 4)), array_keys($this->fields)));
         $this->children    = array_values(array_map(static fn (array $c) => [
@@ -201,6 +212,7 @@ final class Schema
             'name'         => $this->name,
             'label'        => $this->label,
             'label_plural' => $this->labelPlural,
+            'gender'       => $this->gender,
             'icon'         => $this->icon,
             'title_field'  => $this->titleField,
             'subtitle_field' => $this->subtitleField,

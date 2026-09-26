@@ -22,8 +22,8 @@ return [
     ['id' => 'asset',      'label' => 'Asset',                  'icon' => 'fa-gem',                  'group' => 'Archivio',       'path' => '/asset',       'view' => 'entity-table', 'entity' => 'assets',     'step' => 4, 'enabled' => true],
 
     ['id' => 'relazioni',  'label' => 'Grafo dei legami',       'icon' => 'fa-diagram-project',      'group' => 'Mappatura',      'path' => '/relazioni',   'view' => 'relations',    'entity' => 'relations',  'step' => 5,  'enabled' => true],
-    ['id' => 'genealogia', 'label' => 'Alberi genealogici',     'icon' => 'fa-sitemap',              'group' => 'Mappatura',      'path' => '/genealogia',  'view' => 'genealogy',    'step' => 6,  'enabled' => false],
-    ['id' => 'patrimonio', 'label' => 'Matrice proprietà',      'icon' => 'fa-vault',                'group' => 'Mappatura',      'path' => '/patrimonio',  'view' => 'ownership',    'step' => 6,  'enabled' => false],
+    ['id' => 'genealogia', 'label' => 'Alberi genealogici',     'icon' => 'fa-sitemap',              'group' => 'Mappatura',      'path' => '/genealogia',  'view' => 'genealogy',    'entity' => 'lineages',   'step' => 6,  'enabled' => true],
+    ['id' => 'patrimonio', 'label' => 'Matrice proprietà',      'icon' => 'fa-vault',                'group' => 'Mappatura',      'path' => '/patrimonio',  'view' => 'ownership',    'entity' => 'ownerships', 'step' => 6,  'enabled' => true],
 
     ['id' => 'timeline',   'label' => 'Doppia timeline',        'icon' => 'fa-timeline',             'group' => 'Tempo e spazio', 'path' => '/timeline',    'view' => 'timeline',     'step' => 7,  'enabled' => false],
     ['id' => 'spazio',     'label' => 'Percorsi e planimetrie', 'icon' => 'fa-map-location-dot',     'group' => 'Tempo e spazio', 'path' => '/spazio',      'view' => 'space',        'step' => 8,  'enabled' => false],

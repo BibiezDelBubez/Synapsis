@@ -17,6 +17,9 @@ class Model
     public const MAX_LIMIT = 1000;
     public const DEFAULT_LIMIT = 200;
 
+    /** Cache per richiesta delle mappe id → titolo usate dai titoli calcolati (title_template). */
+    private static array $titleMaps = [];
+
     public function __construct(
         public readonly Schema $schema,
         protected readonly ?int $caseId = null,
@@ -56,7 +59,7 @@ class Model
         );
 
         return [
-            'data' => array_map([$this->schema, 'castRow'], $rows),
+            'data' => $this->decorate(array_map([$this->schema, 'castRow'], $rows)),
             'meta' => ['total' => $total, 'limit' => $limit, 'offset' => $offset],
         ];
     }
@@ -67,6 +70,15 @@ class Model
      */
     public function summaries(): array
     {
+        if ($this->schema->titleTemplate !== null) {
+            $subtitle = $this->schema->subtitleField;
+            return array_map(static fn (array $r) => [
+                'id'       => $r['id'],
+                'title'    => $r['_title'],
+                'subtitle' => $subtitle && $r[$subtitle] !== null ? mb_strimwidth((string) $r[$subtitle], 0, 120, '…') : null,
+            ], $this->list(['limit' => self::MAX_LIMIT])['data']);
+        }
+
         [$where, $params] = $this->buildWhere([]);
         $title = $this->schema->titleField;
         $subtitle = $this->schema->subtitleField ?? 'NULL';
@@ -88,7 +100,7 @@ class Model
             "SELECT * FROM {$this->schema->table} WHERE id = ?{$scopeSql}",
             array_merge([$id], $params)
         );
-        return $row === null ? null : $this->schema->castRow($row);
+        return $row === null ? null : $this->decorate([$this->schema->castRow($row)])[0];
     }
 
     /** Come find() ma lancia 404 se il record non esiste. */
@@ -99,8 +111,11 @@ class Model
 
     public function create(array $input): array
     {
-        $data = $this->beforeSave($this->schema->validate($input), null);
+        $data = $this->schema->validate($input);
+        $this->checkDistinct($data, null);
+        $data = $this->beforeSave($data, null);
         $this->checkReferences($data);
+        self::$titleMaps = [];
 
         $now = date('Y-m-d H:i:s');
         $data['created_at'] = $now;
@@ -128,8 +143,11 @@ class Model
     public function update(int $id, array $input): array
     {
         $before = $this->findOrFail($id);
-        $data = $this->beforeSave($this->schema->validate($input, true), $before);
+        $data = $this->schema->validate($input, true);
+        $this->checkDistinct($data, $before);
+        $data = $this->beforeSave($data, $before);
         $this->checkReferences($data);
+        self::$titleMaps = [];
 
         if ($data !== []) {
             $data['updated_at'] = date('Y-m-d H:i:s');
@@ -149,6 +167,7 @@ class Model
     public function delete(int $id): void
     {
         $record = $this->findOrFail($id);
+        self::$titleMaps = [];
         [$scopeSql, $params] = $this->scope();
         Database::execute(
             "DELETE FROM {$this->schema->table} WHERE id = ?{$scopeSql}",
@@ -171,6 +190,77 @@ class Model
 
     protected function afterDelete(array $record): void
     {
+    }
+
+    // --- Titoli calcolati e regole generiche ------------------------------------
+
+    /** Aggiunge _title alle righe se lo schema ha un title_template. */
+    protected function decorate(array $rows): array
+    {
+        $template = $this->schema->titleTemplate;
+        if ($template === null || $rows === []) {
+            return $rows;
+        }
+        return array_map(function (array $row) use ($template): array {
+            // Parti opzionali [ … ]: spariscono se i loro segnaposto sono tutti vuoti
+            $title = preg_replace_callback('/\[([^\]]*)\]/u', function (array $m) use ($row): string {
+                $filled = false;
+                $text = $this->fillPlaceholders($m[1], $row, $filled);
+                return $filled ? $text : '';
+            }, $template);
+            $unused = false;
+            $row['_title'] = trim($this->fillPlaceholders((string) $title, $row, $unused));
+            return $row;
+        }, $rows);
+    }
+
+    private function fillPlaceholders(string $text, array $row, bool &$filled): string
+    {
+        return (string) preg_replace_callback('/\{(\w+)\}/', function (array $m) use ($row, &$filled): string {
+            $field = $this->schema->fields[$m[1]] ?? null;
+            $value = $row[$m[1]] ?? null;
+            if ($field === null || $value === null || $value === '') {
+                return '';
+            }
+            $filled = true;
+            return match ($field['type']) {
+                'ref'   => $this->titleOf($field['entity'], (int) $value),
+                'enum'  => (string) ($field['options'][$value] ?? $value),
+                'bool'  => $value ? 'sì' : 'no',
+                default => (string) $value,
+            };
+        }, $text);
+    }
+
+    /** Titolo di un record di un'altra entità (mappa caricata una volta per richiesta). */
+    protected function titleOf(string $entity, int $id): string
+    {
+        $key = $entity . ':' . ($this->caseId ?? 0);
+        if (!isset(self::$titleMaps[$key])) {
+            self::$titleMaps[$key] = array_column(self::for($entity, $this->caseId)->summaries(), 'title', 'id');
+        }
+        return (string) (self::$titleMaps[$key][$id] ?? "#{$id}");
+    }
+
+    /** Regola 'distinct' dello schema: i campi indicati non possono coincidere (es. genitore e figlio). */
+    protected function checkDistinct(array $data, ?array $before): void
+    {
+        if (count($this->schema->distinct) < 2) {
+            return;
+        }
+        $values = array_map(
+            static fn (string $f) => array_key_exists($f, $data) ? $data[$f] : ($before[$f] ?? null),
+            $this->schema->distinct
+        );
+        $present = array_filter($values, static fn ($v) => $v !== null);
+        if (count($present) > 1 && count(array_unique($present)) < count($present)) {
+            $fields = $this->schema->distinct;
+            $last = $fields[count($fields) - 1];
+            $labels = array_map(fn (string $f) => $this->schema->fields[$f]['label'], $fields);
+            throw new HttpException(422, 'Valori uguali non ammessi.', [
+                'fields' => [$last => implode(' e ', $labels) . ' devono essere diversi.'],
+            ]);
+        }
     }
 
     // --- Costruzione delle query --------------------------------------------

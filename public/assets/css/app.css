@@ -340,7 +340,6 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .child-row { display: flex; align-items: flex-start; gap: .5rem; padding: .45rem .6rem; border: 1px solid var(--bs-border-color); border-radius: var(--sn-radius); background: var(--bs-body-bg); }
 .child-values { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: .25rem .6rem; align-items: center; }
 .child-value.child-text { flex-basis: 100%; color: var(--bs-secondary-color); font-size: .8rem; }
-.child-value.child-int::before { content: "Cap. "; color: var(--bs-secondary-color); }
 .child-actions { display: flex; gap: .15rem; flex-shrink: 0; }
 .child-form-wrap { padding: .75rem; border: 1px solid var(--bs-primary-border-subtle); border-radius: var(--sn-radius); background: var(--bs-body-bg); }
 .child-empty { font-size: .8rem; color: var(--bs-tertiary-color); }
@@ -390,7 +389,8 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 }
 .graph-legend span { display: inline-flex; align-items: center; gap: .35rem; }
 .legend-line { display: inline-block; width: 1.4rem; height: 3px; border-radius: 2px; }
-.legend-dashed { background: repeating-linear-gradient(90deg, var(--bs-secondary-color) 0 5px, transparent 5px 9px); }
+.legend-dashed { background: repeating-linear-gradient(90deg, var(--legend-color, var(--bs-secondary-color)) 0 5px, transparent 5px 9px); }
+.public-mode .truth-only { display: none !important; }
 .graph-hint {
     position: absolute;
     top: .75rem;
@@ -425,6 +425,67 @@ body:not(.panel-open) .app-panel { border-left: 0; }
     border-radius: .4rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .3);
 }
+
+/* --- Schede interne di una vista (Grafo | Elenco …) --------------------------- */
+.view-panes, .view-pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.view-pane[hidden] { display: none; }
+.table-toolbar { margin-bottom: .75rem; }
+
+/* --- Albero genealogico ---------------------------------------------------------- */
+.family-select { width: auto; min-width: 180px; }
+
+/* --- Matrice proprietà -------------------------------------------------------------- */
+.matrix-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--sn-radius);
+    background: var(--bs-body-bg);
+}
+.matrix-table { --bs-table-bg: transparent; border-collapse: separate; border-spacing: 0; }
+.matrix-table th, .matrix-table td { padding: .45rem .7rem; vertical-align: middle; border-bottom: 1px solid var(--bs-border-color); }
+.matrix-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bs-tertiary-bg);
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+    white-space: nowrap;
+}
+.matrix-table thead th.matrix-owner { text-align: center; max-width: 12ch; overflow: hidden; text-overflow: ellipsis; }
+.matrix-table .matrix-asset {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bs-body-bg);
+    font-weight: 500;
+    white-space: nowrap;
+}
+.matrix-table thead .matrix-corner { left: 0; z-index: 3; }
+.matrix-sub { font-size: .72rem; color: var(--bs-tertiary-color); font-weight: 400; }
+.matrix-cell { text-align: center; cursor: pointer; min-width: 90px; }
+.matrix-cell:hover, .matrix-cell:focus { background: var(--sn-hover-bg); outline: none; }
+.matrix-cell:focus { box-shadow: inset 0 0 0 2px var(--bs-primary); }
+.matrix-add { color: transparent; }
+.matrix-cell:hover .matrix-add, .matrix-cell:focus .matrix-add { color: var(--bs-tertiary-color); }
+.matrix-share {
+    display: inline-flex;
+    align-items: center;
+    padding: .15rem .5rem;
+    border-radius: .35rem;
+    font-weight: 600;
+    font-size: .8rem;
+    background: color-mix(in srgb, var(--bs-primary) calc(var(--share) * 55%), transparent);
+    border: 1px solid color-mix(in srgb, var(--bs-primary) 45%, transparent);
+}
+.matrix-share.secret { border-style: dashed; border-color: #e03131; }
+.matrix-table tfoot th, .matrix-table tfoot td { background: var(--bs-tertiary-bg); border-bottom: 0; font-size: .8rem; }
+.quota-ok { color: var(--bs-success); }
+.quota-under { color: var(--bs-warning); }
+.quota-over { color: var(--bs-danger); font-weight: 600; }
 
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
