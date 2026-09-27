@@ -1,6 +1,6 @@
 # Sinapsi — stato dello sviluppo
 
-Ultimo aggiornamento: 27/09/2026 · versione **0.13.0** · completati gli **step 1–13** su 14.
+Ultimo aggiornamento: 27/09/2026 · versione **1.0.0** · completati **tutti i 14 step** della roadmap.
 
 ## Regole di lavoro concordate con l'utente
 
@@ -37,12 +37,13 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 ### Backend (app/)
 
 - `Core/`: App (kernel, errori JSON/HTML), Router (`{id}` numerico), Request/Response, Controller, View, Database, Migrator,
-  Config, Logger, HttpException, **Upload** (immagini verificate in `public/uploads/case-{id}/`, ignorate da git; `.htaccess` blocca gli script), **Schema** (validazione/cast), **Model** (CRUD generico, ricerca, filtri, ordinamento, scope sul caso, controllo ref, `summaries()`), Settings (caso attivo).
+  Config, Logger, HttpException, **CaseArchive** (backup/ripristino JSON di un caso guidato dagli schemi, pulizia immagini), **Dossier** (Markdown dagli schemi), **Upload** (immagini verificate in `public/uploads/case-{id}/`, ignorate da git; `.htaccess` blocca gli script), **Schema** (validazione/cast), **Model** (CRUD generico, ricerca, filtri, ordinamento, scope sul caso, controllo ref, `summaries()`), Settings (caso attivo).
 - `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero), EventsModel (date obbligatorie secondo il tipo, fine ≥ inizio), RoutesModel (niente percorsi doppi), CluesModel (svelato ≥ scoperto), SuspectsModel (un sospettato per delitto), AlibisModel (fine ≥ inizio, crolla dopo la dichiarazione), ChaptersModel (numero unico), KnowledgeModel (una voce per personaggio e informazione), LiesModel (smascherata dopo essere detta, non a sé stessi), MapsModel (cancella l'immagine sostituita/eliminata); CasesModel cancella anche le immagini del caso.
   `Model::for()` restituisce sempre la classe dell'entità richiesta (`self`, non `static`).
 - `Controllers/Api/`: ResourceController (REST generico `/api/{entity}[/{id}]`, `?q=&campo=&sort=&dir=&limit=&offset=&case_id=`),
   SessionController (`GET /api/session`, `PUT /api/session/case`), SearchController (`GET /api/search` indice per Ctrl+K),
-  SystemController (`/api/health`, `/api/modules`, `/api/schema`), UploadController (`POST /api/uploads`, multipart campo `file` → `{path, width, height}`).
+  SystemController (`/api/health`, `/api/modules`, `/api/schema`), UploadController (`POST /api/uploads`, multipart campo `file` → `{path, width, height}`),
+  ArchiveController (`GET /api/dossier?sections=`, `GET|POST /api/backup/case`, `GET /api/backup/database`, `POST /api/uploads/cleanup`).
 - `config/modules.php`: registro unico dei moduli (menu, router SPA, Alt+1…9). Campi: id, label, icon, group, path, view, entity, step, enabled, quick_create (Ctrl+K "Crea come …").
 
 ### Frontend (public/assets/js/)
@@ -50,7 +51,7 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 - `core/`: api, dom (h(), emit/on con signal, confirmButton), resource (CRUD + getSchema/getSchemas), form (renderForm con `exclude`, readForm, attachSubmit, showErrors),
   format (formatValue, mappe ref), panel (pannello laterale: lettura/modifica, sezioni figlie), children (sotto-elenchi generici), modal, entity-manager (gestore in modale, usato per i Casi),
   router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, loadTimeline — catturano `window.vis` separatamente —, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage: get/set testo, **getJSON/setJSON** per numeri, booleani e liste), assets (loadScript/loadStyle su richiesta).
-- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes), knowledge (chi sa cosa, mappa delle bugie, scaletta dei capitoli), ideas (cestino delle idee con conversione), tropes (+ tropes-catalog), consistency (+ consistency-checks), analysis (presenze, opportunità, controlli alibi: condiviso da matrix e consistency).
+- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes), knowledge (chi sa cosa, mappa delle bugie, scaletta dei capitoli), ideas (cestino delle idee con conversione), tropes (+ tropes-catalog), consistency (+ consistency-checks), analysis (presenze, opportunità, controlli alibi: condiviso da matrix e consistency), dossier (anteprima con marked, .md, stampa/PDF, backup).
 - format.js: formatValue (con prefix/suffix), newLabel(schema) per "Nuovo/Nuova …".
 - `modules/cases.js`: finestra Casi (Alt+C).
 - Eventi globali: `case:changed`, `data:changed {entity, action, record}`, `panel:changed`, `route:changed`, `theme:changed`, `app:error`.
@@ -95,16 +96,19 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
    fair play (colpevole che compare tardi, POV che sa ciò che il lettore ignora), fonti delle conoscenze, bugie mai smascherate o smascherate da chi non sa,
    capitoli mancanti o senza POV, genitori più giovani dei figli, quote ≠ 100%, idee urgenti, tropi solo previsti); filtri per gravità e area, "Ignora" per caso (localStorage), R ricontrolla.
    Corretto: le preferenze non testuali (vista lettore, delitto scelto, planimetria, filtri) ora si salvano come JSON.
+14. Dossier e backup: dossier Markdown generato dal server dagli schemi (sezioni a scelta, entità figlie dentro il record padre, indice), anteprima,
+   download .md, stampa / "Salva come PDF" del browser con CSS di stampa dedicato. Backup del caso in JSON (dati + immagini in base64), ripristino sempre
+   come NUOVO caso (id rinumerati, riferimenti ricollegati in due passaggi, anche quelli polimorfici delle idee), download del database SQLite completo
+   (VACUUM INTO), pulizia delle immagini non più usate.
 
-Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V ; POV e bugie , . F ; idee N / ; coerenza R
+Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V ; POV e bugie , . F ; idee N / ; coerenza R ; dossier Ctrl+P
 
-## Prossimi step
+## Prossimi step (facoltativi)
 
-- **14** Esportazione dossier Markdown/PDF + backup.
 - Extra proposti (dopo il 14, a scelta dell'utente): matrice ipotesi concorrenti (ACH), distribuzione indizi per capitolo, indicatore di sospetto, controllo depistaggi/"fucili di Čechov", calcolatore ora del decesso, alba/tramonto/luna offline, scenari "e se…", import capitoli da .docx, lavagna investigativa, istantanee del caso.
 
 ## Note
 
-- Le immagini caricate ma mai salvate in un record restano in `public/uploads/` (innocue; pulizia prevista con il backup dello step 14).
+- Le immagini caricate ma mai salvate in un record restano in `public/uploads/` finché non si usa "Pulizia immagini" (Dossier → Backup).
 - Il database è in una cartella OneDrive: `journal_mode = DELETE` in `config/config.php`.
 - `public/.htaccess` imposta `Cache-Control: no-cache` per JS/CSS (serve mod_headers).

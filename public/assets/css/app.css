@@ -840,6 +840,47 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .check-links { display: flex; flex-wrap: wrap; gap: .2rem .8rem; font-size: .76rem; margin-top: .2rem; }
 @media (max-width: 767.98px) { .check-tiles { grid-template-columns: minmax(0, 1fr); } }
 
+/* --- Dossier e backup ------------------------------------------------------------------ */
+.dossier-view { flex-direction: row; gap: 1rem; }
+.dossier-side { width: 230px; flex: none; overflow: auto; border: 1px solid var(--bs-border-color); border-radius: var(--sn-radius); background: var(--bs-tertiary-bg); padding: .75rem; }
+.dossier-sections .form-check { margin-bottom: .15rem; }
+.dossier-scroll { flex: 1; min-width: 0; overflow: auto; border: 1px solid var(--bs-border-color); border-radius: var(--sn-radius); background: var(--bs-body-bg); }
+.dossier-preview { max-width: 820px; margin: 0 auto; padding: 1.5rem 2rem 3rem; line-height: 1.55; }
+.dossier-preview h1 { font-size: 1.9rem; margin-bottom: .25rem; }
+.dossier-preview h2 { font-size: 1.35rem; margin-top: 2rem; padding-bottom: .3rem; border-bottom: 1px solid var(--bs-border-color); }
+.dossier-preview h3 { font-size: 1.05rem; margin-top: 1.4rem; }
+.dossier-preview blockquote { color: var(--bs-secondary-color); border-left: 3px solid var(--bs-border-color); padding-left: .75rem; font-size: .85rem; }
+.dossier-preview ul { padding-left: 1.2rem; }
+.dossier-preview img { max-width: 100%; border: 1px solid var(--bs-border-color); border-radius: .4rem; }
+.backup-view { overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: .75rem; align-content: start; }
+.backup-card { border: 1px solid var(--bs-border-color); border-radius: var(--sn-radius); background: var(--bs-tertiary-bg); padding: 1rem; }
+.backup-icon { font-size: 1.6rem; color: var(--bs-primary); width: 2rem; text-align: center; }
+@media (max-width: 991.98px) {
+    .dossier-view { flex-direction: column; }
+    .dossier-side { width: auto; }
+}
+
+/* Stampa del dossier: solo il testo, su fondo bianco (Salva come PDF dal browser) */
+@media print {
+    body.printing-dossier { background: #fff !important; color: #000 !important; }
+    body.printing-dossier .app-sidebar, body.printing-dossier .app-topbar, body.printing-dossier .app-panel,
+    body.printing-dossier .page-header, body.printing-dossier .dossier-side, body.printing-dossier .toast-container,
+    body.printing-dossier .view-pane:not(:has(.dossier-view)) { display: none !important; }
+    body.printing-dossier .app-shell, body.printing-dossier .app-main, body.printing-dossier .app-content,
+    body.printing-dossier .graph-view, body.printing-dossier .view-panes, body.printing-dossier .view-pane,
+    body.printing-dossier .dossier-view, body.printing-dossier .dossier-scroll {
+        display: block !important; position: static !important; height: auto !important; overflow: visible !important;
+        border: 0 !important; margin: 0 !important; padding: 0 !important; background: #fff !important; grid-template-columns: none !important;
+    }
+    body.printing-dossier .dossier-preview { max-width: none; padding: 0; }
+    body.printing-dossier .dossier-preview, body.printing-dossier .dossier-preview * { color: #000 !important; }
+    body.printing-dossier .dossier-preview h2 { break-before: page; border-color: #999; }
+    body.printing-dossier .dossier-preview h2:first-of-type { break-before: avoid; }
+    body.printing-dossier .dossier-preview h3 { break-after: avoid; }
+    body.printing-dossier .dossier-preview a { color: #000; text-decoration: none; }
+    body.printing-dossier .dossier-preview img { max-height: 60vh; }
+}
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }

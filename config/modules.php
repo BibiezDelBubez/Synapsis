@@ -36,5 +36,5 @@ return [
     ['id' => 'idee',       'label' => 'Idee orfane',            'icon' => 'fa-lightbulb',            'group' => 'Scrittura',      'path' => '/idee',        'view' => 'ideas',        'entity' => 'ideas',      'step' => 12, 'enabled' => true, 'quick_create' => true],
     ['id' => 'tropi',      'label' => 'Archetipi e tropi',      'icon' => 'fa-masks-theater',        'group' => 'Scrittura',      'path' => '/tropi',       'view' => 'tropes',       'entity' => 'tropes',     'step' => 13, 'enabled' => true],
     ['id' => 'coerenza',   'label' => 'Consistency check',      'icon' => 'fa-triangle-exclamation', 'group' => 'Scrittura',      'path' => '/coerenza',    'view' => 'consistency',  'step' => 13, 'enabled' => true],
-    ['id' => 'dossier',    'label' => 'Dossier del caso',       'icon' => 'fa-file-export',          'group' => 'Scrittura',      'path' => '/dossier',     'view' => 'dossier',      'step' => 14, 'enabled' => false],
+    ['id' => 'dossier',    'label' => 'Dossier del caso',       'icon' => 'fa-file-export',          'group' => 'Scrittura',      'path' => '/dossier',     'view' => 'dossier',      'step' => 14, 'enabled' => true],
 ];

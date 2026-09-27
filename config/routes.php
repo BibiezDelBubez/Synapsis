@@ -8,6 +8,7 @@
  * @var \App\Core\Router $router
  */
 
+use App\Controllers\Api\ArchiveController;
 use App\Controllers\Api\ResourceController;
 use App\Controllers\Api\SearchController;
 use App\Controllers\Api\SessionController;
@@ -27,6 +28,13 @@ $router->put('/api/session/case', [SessionController::class, 'setCase']);
 
 // --- Caricamento immagini (campi di tipo image) --------------------------
 $router->post('/api/uploads', [UploadController::class, 'store']);
+$router->post('/api/uploads/cleanup', [ArchiveController::class, 'cleanupUploads']);
+
+// --- Dossier e backup ----------------------------------------------------------
+$router->get('/api/dossier', [ArchiveController::class, 'dossier']);
+$router->get('/api/backup/case', [ArchiveController::class, 'exportCase']);
+$router->post('/api/backup/case', [ArchiveController::class, 'importCase']);
+$router->get('/api/backup/database', [ArchiveController::class, 'exportDatabase']);
 
 // --- API generiche per tutte le entità di config/entities/ ------------------
 $router->get('/api/{entity}', [ResourceController::class, 'index']);
