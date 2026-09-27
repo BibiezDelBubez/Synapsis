@@ -28,7 +28,7 @@ const MAX_SCALE = 8;
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
 export function mapViewer({ pinSchema }) {
-    const state = { maps: [], pins: [], mapId: prefs.get('space.map', null), scale: 1, tx: 0, ty: 0, addMode: false, fitted: null };
+    const state = { maps: [], pins: [], mapId: prefs.getJSON('space.map', null), scale: 1, tx: 0, ty: 0, addMode: false, fitted: null };
 
     const select = h('select', { class: 'form-select form-select-sm', style: 'width:auto;min-width:14rem', 'aria-label': 'Planimetria' });
     const editBtn = h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', title: 'Scheda della planimetria' }, icon('fa-pen'));
@@ -220,7 +220,7 @@ export function mapViewer({ pinSchema }) {
 
     select.addEventListener('change', () => {
         state.mapId = Number(select.value);
-        prefs.set('space.map', state.mapId);
+        prefs.setJSON('space.map', state.mapId);
         render();
     });
     editBtn.addEventListener('click', () => { if (currentMap()) panel.open('maps', state.mapId); });
@@ -266,7 +266,7 @@ export function mapViewer({ pinSchema }) {
             state.pins = pins;
             if (focusMapId) state.mapId = focusMapId;
             if (!maps.some((m) => m.id === state.mapId)) state.mapId = maps[0]?.id ?? null;
-            if (focusMapId || state.mapId !== prefs.get('space.map', null)) prefs.set('space.map', state.mapId);
+            if (focusMapId || state.mapId !== prefs.getJSON('space.map', null)) prefs.setJSON('space.map', state.mapId);
             render();
         },
         refreshSelection: () => renderPins(),

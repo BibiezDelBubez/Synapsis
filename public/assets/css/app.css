@@ -791,6 +791,55 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .idea-actions .idea-convert { width: auto; flex: 1; min-width: 0; max-width: 13rem; }
 .idea-capture-box .btn { white-space: nowrap; }
 
+/* --- Archetipi e tropi ------------------------------------------------------------------ */
+.trope-view { overflow: auto; }
+.trope-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: .6rem; }
+.trope-card { display: flex; flex-direction: column; gap: .35rem; background: var(--bs-body-bg); border: 1px solid var(--bs-border-color); border-radius: .5rem; padding: .6rem .7rem; font-size: .85rem; }
+.trope-card:not(.catalog) { cursor: pointer; }
+.trope-card:not(.catalog):hover, .trope-card:focus { border-color: var(--bs-secondary-color); outline: none; }
+.trope-card.catalog.added { opacity: .6; }
+.trope-card.status-avoided { border-style: dashed; }
+.trope-desc, .trope-note { font-size: .78rem; color: var(--bs-secondary-color); }
+.trope-note { color: var(--bs-body-color); white-space: pre-line; }
+.trope-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .6rem; font-size: .75rem; color: var(--bs-secondary-color); margin-top: auto; }
+.trope-chip { padding: .05rem .45rem; border-radius: 1rem; background: var(--bs-secondary-bg); }
+.trope-status-used { background: rgba(25, 135, 84, .18); border-color: rgba(25, 135, 84, .45); }
+.trope-status-subverted { background: rgba(111, 66, 193, .18); border-color: rgba(111, 66, 193, .45); }
+.trope-status-avoided { background: rgba(220, 53, 69, .15); border-color: rgba(220, 53, 69, .4); }
+
+/* --- Consistency check ------------------------------------------------------------------- */
+.check-view { overflow: auto; }
+.check-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-bottom: .75rem; }
+.check-tile {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    text-align: left;
+    padding: .75rem 1rem;
+    border-radius: var(--sn-radius);
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    opacity: .55;
+}
+.check-tile.active { opacity: 1; color: var(--bs-body-color); }
+.check-tile-icon { font-size: 1.5rem; }
+.check-tile-num { font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.tile-danger .check-tile-icon { color: var(--bs-danger); }
+.tile-warning .check-tile-icon { color: var(--bs-warning); }
+.tile-info .check-tile-icon { color: var(--bs-info); }
+.tile-danger.active { border-color: var(--bs-danger-border-subtle); }
+.tile-warning.active { border-color: var(--bs-warning-border-subtle); }
+.check-group { margin-bottom: 1.25rem; }
+.check-item { display: flex; gap: .6rem; align-items: flex-start; padding: .5rem .6rem; border-radius: .4rem; border-left: 3px solid transparent; font-size: .88rem; }
+.check-item:hover { background: var(--sn-hover-bg); }
+.check-item.level-danger { border-left-color: var(--bs-danger); }
+.check-item.level-warning { border-left-color: var(--bs-warning); }
+.check-item.level-info { border-left-color: var(--bs-info); }
+.check-item.ignored { opacity: .45; }
+.check-links { display: flex; flex-wrap: wrap; gap: .2rem .8rem; font-size: .76rem; margin-top: .2rem; }
+@media (max-width: 767.98px) { .check-tiles { grid-template-columns: minmax(0, 1fr); } }
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }

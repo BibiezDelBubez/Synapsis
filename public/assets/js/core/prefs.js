@@ -21,4 +21,17 @@ export const prefs = {
             /* storage non disponibile: la preferenza vale solo per questa sessione */
         }
     },
+    /** Valori non testuali (numeri, booleani, liste): salvati come JSON. */
+    getJSON(key, fallback = null) {
+        const raw = this.get(key, null);
+        if (raw === null) return fallback;
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return fallback;
+        }
+    },
+    setJSON(key, value) {
+        this.set(key, JSON.stringify(value));
+    },
 };

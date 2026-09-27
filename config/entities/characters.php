@@ -19,6 +19,7 @@ return [
         ['entity' => 'alibis', 'foreign_key' => 'character_id', 'label' => 'Alibi'],
         ['entity' => 'knowledge', 'foreign_key' => 'character_id', 'label' => 'Cosa sa'],
         ['entity' => 'lies', 'foreign_key' => 'liar_id', 'label' => 'Bugie che dice'],
+        ['entity' => 'trope_links', 'foreign_key' => 'character_id', 'label' => 'Archetipi e tropi'],
     ],
 
     'fields' => [

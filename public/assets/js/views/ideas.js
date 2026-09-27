@@ -44,7 +44,7 @@ export async function mount(container, { module }) {
     const schema = await getSchema('ideas');
     const F = schema.fields;
     const state = {
-        ideas: [], statuses: new Set(prefs.get('ideas.statuses', ['open', 'parked'])),
+        ideas: [], statuses: new Set(prefs.getJSON('ideas.statuses', ['open', 'parked'])),
         kind: '', tag: '', q: '', titles: new Map(), pending: null,
     };
 
@@ -163,7 +163,7 @@ export async function mount(container, { module }) {
         const k = chip.dataset.status;
         if (state.statuses.has(k)) state.statuses.delete(k);
         else state.statuses.add(k);
-        prefs.set('ideas.statuses', [...state.statuses]);
+        prefs.setJSON('ideas.statuses', [...state.statuses]);
         render();
     });
     tagChips.addEventListener('click', (e) => {

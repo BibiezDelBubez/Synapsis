@@ -1,6 +1,6 @@
 # Sinapsi — stato dello sviluppo
 
-Ultimo aggiornamento: 27/09/2026 · versione **0.12.0** · completati gli **step 1–12** su 14.
+Ultimo aggiornamento: 27/09/2026 · versione **0.13.0** · completati gli **step 1–13** su 14.
 
 ## Regole di lavoro concordate con l'utente
 
@@ -20,7 +20,7 @@ Ultimo aggiornamento: 27/09/2026 · versione **0.12.0** · completati gli **step
   `.htaccess` in radice inoltra tutto a `public/`. Base path calcolato da solo (funziona in sottocartella).
 - Frontend: SPA in JavaScript nativo (moduli ES, nessuna build). Bootstrap 5.3.8, FontAwesome 6.7.2,
   vis-network 10.1.2, vis-timeline 8.5.4, Fuse.js 7.5.0 (`vendor/fuse/fuse.esm.min.js`), marked 18 — tutto in `public/vendor/`.
-- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership, 005_events, 006_space, 007_clues, 008_matrix, 009_knowledge, 010_ideas).
+- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership, 005_events, 006_space, 007_clues, 008_matrix, 009_knowledge, 010_ideas, 011_tropes).
 
 ### Principio DRY: entità dichiarative
 
@@ -49,8 +49,8 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 
 - `core/`: api, dom (h(), emit/on con signal, confirmButton), resource (CRUD + getSchema/getSchemas), form (renderForm con `exclude`, readForm, attachSubmit, showErrors),
   format (formatValue, mappe ref), panel (pannello laterale: lettura/modifica, sezioni figlie), children (sotto-elenchi generici), modal, entity-manager (gestore in modale, usato per i Casi),
-  router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, loadTimeline — catturano `window.vis` separatamente —, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
-- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes), knowledge (chi sa cosa, mappa delle bugie, scaletta dei capitoli), ideas (cestino delle idee con conversione).
+  router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, loadTimeline — catturano `window.vis` separatamente —, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage: get/set testo, **getJSON/setJSON** per numeri, booleani e liste), assets (loadScript/loadStyle su richiesta).
+- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes), knowledge (chi sa cosa, mappa delle bugie, scaletta dei capitoli), ideas (cestino delle idee con conversione), tropes (+ tropes-catalog), consistency (+ consistency-checks), analysis (presenze, opportunità, controlli alibi: condiviso da matrix e consistency).
 - format.js: formatValue (con prefix/suffix), newLabel(schema) per "Nuovo/Nuova …".
 - `modules/cases.js`: finestra Casi (Alt+C).
 - Eventi globali: `case:changed`, `data:changed {entity, action, record}`, `panel:changed`, `route:changed`, `theme:changed`, `app:error`.
@@ -89,12 +89,17 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 12. Idee orfane: `ideas` (idea, dettagli, potrebbe diventare, priorità, stato Da collocare/Parcheggiata/Usata/Scartata, etichette, capitolo previsto, converted_entity/converted_id).
    Cattura veloce (Invio; `#parola` = etichetta), filtri per stato/tipo/etichetta, ricerca. "Converti in…" apre il modulo del nuovo elemento già compilato;
    al salvataggio l'idea diventa Usata e rimanda all'elemento. Ctrl+K "Crea come idea". format.loadRefMap usa `_title` per le entità con title_template.
+13. Archetipi e tropi: `tropes` (archetipo / tropo / regola del genere; uso Previsto/Usato/Ribaltato/Da evitare; capitolo; come lo uso) + `trope_links` (personaggio, capitolo);
+   catalogo di 36 voci classiche aggiungibili con un clic. Consistency check: tutte le incongruenze del caso (personaggi prima della nascita / dopo la morte,
+   stesso personaggio in due luoghi, spostamenti impossibili, catena di custodia, indizi mai spiegati, colpevole senza opportunità/mezzo/movente o con alibi solido,
+   fair play (colpevole che compare tardi, POV che sa ciò che il lettore ignora), fonti delle conoscenze, bugie mai smascherate o smascherate da chi non sa,
+   capitoli mancanti o senza POV, genitori più giovani dei figli, quote ≠ 100%, idee urgenti, tropi solo previsti); filtri per gravità e area, "Ignora" per caso (localStorage), R ricontrolla.
+   Corretto: le preferenze non testuali (vista lettore, delitto scelto, planimetria, filtri) ora si salvano come JSON.
 
-Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V ; POV e bugie , . F ; idee N /
+Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V ; POV e bugie , . F ; idee N / ; coerenza R
 
 ## Prossimi step
 
-- **13** Archetipi, tropi, dashboard incongruenze automatica.
 - **14** Esportazione dossier Markdown/PDF + backup.
 - Extra proposti (dopo il 14, a scelta dell'utente): matrice ipotesi concorrenti (ACH), distribuzione indizi per capitolo, indicatore di sospetto, controllo depistaggi/"fucili di Čechov", calcolatore ora del decesso, alba/tramonto/luna offline, scenari "e se…", import capitoli da .docx, lavagna investigativa, istantanee del caso.
 

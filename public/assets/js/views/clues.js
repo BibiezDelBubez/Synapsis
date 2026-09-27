@@ -76,7 +76,7 @@ export async function mount(container, { module }) {
     const F = clueSchema.fields;
     const state = {
         clues: [], steps: [], characters: [], places: [],
-        reader: prefs.get('clues.reader', false), selected: prefs.get('clues.selected', null),
+        reader: prefs.getJSON('clues.reader', false), selected: prefs.getJSON('clues.selected', null),
     };
     const charName = (id) => state.characters.find((c) => c.id === id)?.name ?? `#${id}`;
     const placeName = (id) => state.places.find((p) => p.id === id)?.name ?? `#${id}`;
@@ -278,7 +278,7 @@ export async function mount(container, { module }) {
         const item = e.target.closest('.chain-item');
         if (!item) return;
         state.selected = Number(item.dataset.clueId);
-        prefs.set('clues.selected', state.selected);
+        prefs.setJSON('clues.selected', state.selected);
         renderChain();
     });
     chainDetail.addEventListener('click', (e) => {
@@ -310,7 +310,7 @@ export async function mount(container, { module }) {
     function setReader(on) {
         state.reader = on;
         readerInput.checked = on;
-        prefs.set('clues.reader', on);
+        prefs.setJSON('clues.reader', on);
         renderBoard();
     }
 
