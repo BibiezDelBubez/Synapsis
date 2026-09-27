@@ -8,7 +8,7 @@
  * Larghezza dei campi: chiave 'width' nello schema ('full' | 'half');
  * se assente, testi lunghi e stringhe occupano tutta la riga, gli altri metà.
  */
-import { ApiError } from './api.js';
+import { ApiError, api, url } from './api.js';
 import { emit, h } from './dom.js';
 import { getSchema, resource } from './resource.js';
 
@@ -32,12 +32,52 @@ const controls = {
     enum: (f, v, id) => h('select', { class: 'form-select', id },
         f.required ? null : h('option', { value: '' }, '—'),
         Object.entries(f.options).map(([key, label]) => h('option', { value: key, selected: String(v ?? f.default ?? '') === key }, label))),
+    image: (f, v, id) => imageControl(v, id),
     ref: (f, v, id) => {
         const select = h('select', { class: 'form-select', id }, h('option', { value: '' }, 'Caricamento…'));
         loadRefOptions(select, f, v);
         return select;
     },
 };
+
+/**
+ * Campo immagine: il file viene caricato subito (POST /api/uploads) e nel campo
+ * nascosto resta solo il percorso, che si salva insieme al resto del form.
+ */
+function imageControl(value, id) {
+    const hidden = h('input', { type: 'hidden', id, value: value ?? '' });
+    const preview = h('div', { class: 'image-field-preview' });
+    const status = h('span', { class: 'small text-body-secondary' });
+    const file = h('input', { type: 'file', class: 'form-control', accept: 'image/png,image/jpeg,image/gif,image/webp' });
+    const clear = h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', title: 'Togli immagine' }, h('i', { class: 'fa-solid fa-xmark' }));
+
+    const show = () => {
+        preview.replaceChildren(hidden.value ? h('img', { src: url(hidden.value), alt: '' }) : h('span', { class: 'text-body-tertiary small' }, 'Nessuna immagine'));
+        clear.hidden = !hidden.value;
+    };
+    file.addEventListener('change', async () => {
+        if (!file.files.length) return;
+        status.textContent = 'Caricamento…';
+        file.disabled = true;
+        try {
+            hidden.value = (await api.upload(file.files[0])).path;
+            status.textContent = '';
+            show();
+        } catch (error) {
+            status.textContent = error.message;
+            status.className = 'small text-danger';
+        } finally {
+            file.disabled = false;
+            file.value = '';
+        }
+    });
+    clear.addEventListener('click', () => {
+        hidden.value = '';
+        show();
+    });
+    show();
+    return h('div', { class: 'image-field' }, preview, h('div', { class: 'd-flex gap-2 align-items-center mt-2' }, file, clear), status, hidden);
+}
 
 async function loadRefOptions(select, field, value) {
     try {

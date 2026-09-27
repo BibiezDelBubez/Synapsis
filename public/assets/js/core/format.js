@@ -3,6 +3,7 @@
  * Usata da tabelle, pannello di dettaglio e ricerca: un solo punto per tutte le regole.
  */
 import { formatDateTime, h, icon, on } from './dom.js';
+import { url } from './api.js';
 import { getSchema, resource } from './resource.js';
 
 const currency = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
@@ -60,6 +61,8 @@ export function formatValue(field, value, refMap = undefined, compact = false) {
             return h('span', { class: `badge badge-enum enum-${value}` }, field.options[value] ?? value);
         case 'bool':
             return value ? icon('fa-check text-success') : icon('fa-xmark text-body-tertiary');
+        case 'image':
+            return h('img', { class: compact ? 'image-thumb' : 'image-full', src: url(value), alt: '', loading: 'lazy' });
         case 'color':
             return h('span', { class: 'color-swatch', style: `background:${value}`, title: value });
         case 'ref':

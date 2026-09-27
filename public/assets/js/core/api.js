@@ -36,12 +36,31 @@ async function request(method, path, body) {
     return data;
 }
 
+/** Carica un file (multipart) su /api/uploads e restituisce { path, width, height }. */
+async function upload(file) {
+    const body = new FormData();
+    body.append('file', file);
+    let response;
+    try {
+        response = await fetch(`${BASE}/api/uploads`, { method: 'POST', headers: { Accept: 'application/json' }, body });
+    } catch {
+        throw new ApiError(0, 'Server non raggiungibile. Laragon è avviato?');
+    }
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+        const err = data?.error ?? {};
+        throw new ApiError(response.status, err.message || `Errore HTTP ${response.status}`, err.details || {});
+    }
+    return data;
+}
+
 export const api = {
     get: (path) => request('GET', path),
     post: (path, body) => request('POST', path, body),
     put: (path, body) => request('PUT', path, body),
     patch: (path, body) => request('PATCH', path, body),
     del: (path) => request('DELETE', path),
+    upload,
 };
 
 /** URL di una pagina dell'app (per link generati via JS). */

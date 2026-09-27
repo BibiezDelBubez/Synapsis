@@ -6,7 +6,7 @@
 return [
     'app' => [
         'name'     => 'Sinapsi',
-        'version'  => '0.7.0',
+        'version'  => '0.8.0',
         'debug'    => true,              // false = messaggi d'errore generici
         'timezone' => 'Europe/Rome',
         'locale'   => 'it',
@@ -34,6 +34,12 @@ return [
             'password' => '',
             'charset'  => 'utf8mb4',
         ],
+    ],
+
+    'uploads' => [
+        // Immagini caricate (planimetrie, mappe): public/uploads/case-{id}/
+        'dir'    => PUBLIC_PATH . '/uploads',
+        'max_mb' => 15,
     ],
 
     'log' => [

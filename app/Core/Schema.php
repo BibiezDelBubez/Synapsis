@@ -21,11 +21,12 @@ namespace App\Core;
  *   searchable (campi per la ricerca testuale), order_by ([campo => ASC|DESC]),
  *   fields: [nome => [type, label, required, default, max, min, options, entity, rows, help, width, format, prefix, suffix]]
  *
- * Tipi supportati: string, text, int, float, bool, enum, date, datetime, color, ref, json
+ * Tipi supportati: string, text, int, float, bool, enum, date, datetime, color, ref, json,
+ *                  image (percorso di un file caricato con POST /api/uploads, es. 'uploads/case-1/ab12.png')
  */
 final class Schema
 {
-    public const TYPES = ['string', 'text', 'int', 'float', 'bool', 'enum', 'date', 'datetime', 'color', 'ref', 'json'];
+    public const TYPES = ['string', 'text', 'int', 'float', 'bool', 'enum', 'date', 'datetime', 'color', 'ref', 'json', 'image'];
 
     /** @var array<string, self> */
     private static array $cache = [];
@@ -283,6 +284,12 @@ final class Schema
                 }
                 if (!is_string($value) || !self::isDate($value, 'Y-m-d H:i:s')) {
                     $error = 'Data e ora non valide.';
+                }
+                return $value;
+
+            case 'image':
+                if (!is_string($value) || !preg_match(Upload::PATH_PATTERN, $value)) {
+                    $error = 'Immagine non valida: caricala di nuovo.';
                 }
                 return $value;
 

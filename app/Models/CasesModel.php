@@ -5,10 +5,12 @@ namespace App\Models;
 
 use App\Core\Model;
 use App\Core\Settings;
+use App\Core\Upload;
 
 /**
  * Specializzazione dei Casi: se si elimina il caso aperto, nessun caso resta attivo.
- * (Le entità collegate verranno eliminate dal database con ON DELETE CASCADE.)
+ * (Le entità collegate verranno eliminate dal database con ON DELETE CASCADE;
+ * le immagini caricate per il caso vengono rimosse dal disco.)
  */
 final class CasesModel extends Model
 {
@@ -17,5 +19,6 @@ final class CasesModel extends Model
         if (Settings::activeCaseId() === $record['id']) {
             Settings::setActiveCaseId(null);
         }
+        Upload::deleteCaseFolder($record['id']);
     }
 }

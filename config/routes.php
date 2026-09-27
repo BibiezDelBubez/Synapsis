@@ -12,6 +12,7 @@ use App\Controllers\Api\ResourceController;
 use App\Controllers\Api\SearchController;
 use App\Controllers\Api\SessionController;
 use App\Controllers\Api\SystemController;
+use App\Controllers\Api\UploadController;
 use App\Controllers\HomeController;
 
 // --- API di sistema ----------------------------------------------------------
@@ -23,6 +24,9 @@ $router->get('/api/search', [SearchController::class, 'index']);
 // --- Sessione di lavoro (caso aperto) ---------------------------------------
 $router->get('/api/session', [SessionController::class, 'show']);
 $router->put('/api/session/case', [SessionController::class, 'setCase']);
+
+// --- Caricamento immagini (campi di tipo image) --------------------------
+$router->post('/api/uploads', [UploadController::class, 'store']);
 
 // --- API generiche per tutte le entità di config/entities/ ------------------
 $router->get('/api/{entity}', [ResourceController::class, 'index']);

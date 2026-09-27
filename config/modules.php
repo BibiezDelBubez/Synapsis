@@ -27,7 +27,7 @@ return [
     ['id' => 'patrimonio', 'label' => 'Matrice proprietà',      'icon' => 'fa-vault',                'group' => 'Mappatura',      'path' => '/patrimonio',  'view' => 'ownership',    'entity' => 'ownerships', 'step' => 6,  'enabled' => true],
 
     ['id' => 'timeline',   'label' => 'Doppia timeline',        'icon' => 'fa-timeline',             'group' => 'Tempo e spazio', 'path' => '/timeline',    'view' => 'timeline',     'entity' => 'events',     'step' => 7,  'enabled' => true, 'quick_create' => true],
-    ['id' => 'spazio',     'label' => 'Percorsi e planimetrie', 'icon' => 'fa-map-location-dot',     'group' => 'Tempo e spazio', 'path' => '/spazio',      'view' => 'space',        'step' => 8,  'enabled' => false],
+    ['id' => 'spazio',     'label' => 'Percorsi e planimetrie', 'icon' => 'fa-map-location-dot',     'group' => 'Tempo e spazio', 'path' => '/spazio',      'view' => 'space',        'entity' => 'routes',     'step' => 8,  'enabled' => true],
 
     ['id' => 'indizi',     'label' => 'Indizi e prove',         'icon' => 'fa-magnifying-glass',     'group' => 'Indagine',       'path' => '/indizi',      'view' => 'clues',        'step' => 9,  'enabled' => false],
     ['id' => 'matrice',    'label' => 'Matrice e alibi',        'icon' => 'fa-table-cells',          'group' => 'Indagine',       'path' => '/matrice',     'view' => 'matrix',       'step' => 10, 'enabled' => false],

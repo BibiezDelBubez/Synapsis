@@ -564,6 +564,77 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .nc-dot:hover { r: 8; }
 .legend-dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
 
+/* --- Campo immagine e miniature ------------------------------------------------ */
+.image-field-preview { min-height: 2.5rem; display: flex; align-items: center; }
+.image-field-preview img { max-width: 100%; max-height: 180px; border-radius: .4rem; border: 1px solid var(--bs-border-color); }
+.image-thumb { height: 2rem; width: 3rem; object-fit: cover; border-radius: .25rem; border: 1px solid var(--bs-border-color); vertical-align: middle; }
+.image-full { max-width: 100%; max-height: 240px; border-radius: .4rem; border: 1px solid var(--bs-border-color); }
+
+/* --- Planimetrie ------------------------------------------------------------------ */
+.map-stage { cursor: grab; touch-action: none; user-select: none; background:
+    repeating-conic-gradient(var(--bs-tertiary-bg) 0 25%, var(--bs-body-bg) 0 50%) 0 0 / 24px 24px; }
+.map-stage.panning { cursor: grabbing; }
+.map-stage.adding { cursor: crosshair; }
+.map-canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; --inv: 1; }
+.map-canvas[hidden] { display: none; }
+.map-image { display: block; max-width: none; pointer-events: none; box-shadow: 0 .5rem 1.5rem rgba(0, 0, 0, .35); }
+.map-pins { position: absolute; inset: 0; }
+.map-pin {
+    position: absolute;
+    transform: translate(-50%, -100%) scale(var(--inv));
+    transform-origin: 50% 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    --pin-color: #6ea8fe;
+}
+.map-stage.adding .map-pin { pointer-events: none; }
+.map-pin-dot {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    background: var(--pin-color);
+    border: 2px solid var(--bs-body-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+    order: 2;
+    margin-top: .15rem;
+}
+.map-pin-dot i { transform: rotate(45deg); color: #111; font-size: .8rem; }
+.map-pin-label {
+    order: 1;
+    font-size: .72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: .05rem .4rem;
+    border-radius: .3rem;
+    background: color-mix(in srgb, var(--bs-body-bg) 85%, transparent);
+    color: var(--bs-body-color);
+}
+.map-pin.selected .map-pin-dot, .map-pin:hover .map-pin-dot { box-shadow: 0 0 0 3px var(--bs-body-bg), 0 0 0 5px var(--pin-color); }
+.map-pin.dragging { opacity: .75; cursor: grabbing; }
+
+/* --- Percorrenze e spostamenti ----------------------------------------------------- */
+.calc-box {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--sn-radius);
+    background: var(--bs-tertiary-bg);
+    padding: .6rem .75rem;
+    margin-bottom: .75rem;
+}
+.calc-box .form-select, .calc-box .form-control { width: auto; min-width: 11rem; }
+.calc-result { margin-top: .4rem; }
+.calc-result:empty { display: none; }
+.matrix-diag { background: var(--bs-tertiary-bg); }
+.travel-matrix .matrix-cell { min-width: 80px; white-space: nowrap; }
+.moves-table td { vertical-align: top; }
+.moves-table tr.move-impossible td { background: color-mix(in srgb, var(--bs-danger) 9%, transparent); }
+.moves-table tr.move-tight td { background: color-mix(in srgb, var(--bs-warning) 7%, transparent); }
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }
