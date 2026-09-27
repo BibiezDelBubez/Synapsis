@@ -225,7 +225,7 @@ export async function mount(container, { module }) {
         if (!shown.length) {
             return movesTable.replaceChildren(emptyRow(checks.length
                 ? 'Tutti gli spostamenti sono compatibili con i tempi di percorrenza.'
-                : 'Nessuno spostamento da controllare: servono eventi con orario verità, luogo e partecipanti (Timeline, Alt+6).'));
+                : 'Nessuno spostamento da controllare: servono eventi con orario verità, luogo e partecipanti (Doppia timeline, Alt+8).'));
         }
         const charName = (id) => state.characters.find((c) => c.id === id)?.name ?? `#${id}`;
         const head = h('thead', {}, h('tr', {},

@@ -117,7 +117,7 @@ export async function mount(container, { module }) {
         const crime = eventById(state.crimeId);
         if (!crime) {
             crimeInfo.replaceChildren();
-            return matrixTable.replaceChildren(emptyRow('Nessun evento nel caso: crea il delitto nella Doppia timeline (Alt+6).'));
+            return matrixTable.replaceChildren(emptyRow('Nessun evento nel caso: crea il delitto nella Doppia timeline (Alt+8).'));
         }
         const victims = state.participants.filter((p) => p.event_id === crime.id && p.role === 'victim').map((p) => charName(p.character_id));
         crimeInfo.replaceChildren([

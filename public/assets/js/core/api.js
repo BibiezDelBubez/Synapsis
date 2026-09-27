@@ -25,7 +25,7 @@ async function request(method, path, body) {
     try {
         response = await fetch(`${BASE}/api/${path.replace(/^\/+/, '')}`, options);
     } catch (networkError) {
-        throw new ApiError(0, 'Server non raggiungibile. Laragon è avviato?');
+        throw new ApiError(0, 'Server non raggiungibile: XAMPP (Apache) è avviato?');
     }
 
     const data = response.status === 204 ? null : await response.json().catch(() => null);
@@ -44,7 +44,7 @@ async function upload(file) {
     try {
         response = await fetch(`${BASE}/api/uploads`, { method: 'POST', headers: { Accept: 'application/json' }, body });
     } catch {
-        throw new ApiError(0, 'Server non raggiungibile. Laragon è avviato?');
+        throw new ApiError(0, 'Server non raggiungibile: XAMPP (Apache) è avviato?');
     }
     const data = await response.json().catch(() => null);
     if (!response.ok) {
