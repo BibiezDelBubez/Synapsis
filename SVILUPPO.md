@@ -1,6 +1,6 @@
 # Sinapsi — stato dello sviluppo
 
-Ultimo aggiornamento: 27/09/2026 · versione **0.10.0** · completati gli **step 1–10** su 14.
+Ultimo aggiornamento: 27/09/2026 · versione **0.11.0** · completati gli **step 1–11** su 14.
 
 ## Regole di lavoro concordate con l'utente
 
@@ -20,7 +20,7 @@ Ultimo aggiornamento: 27/09/2026 · versione **0.10.0** · completati gli **step
   `.htaccess` in radice inoltra tutto a `public/`. Base path calcolato da solo (funziona in sottocartella).
 - Frontend: SPA in JavaScript nativo (moduli ES, nessuna build). Bootstrap 5.3.8, FontAwesome 6.7.2,
   vis-network 10.1.2, vis-timeline 8.5.4, Fuse.js 7.5.0 (`vendor/fuse/fuse.esm.min.js`), marked 18 — tutto in `public/vendor/`.
-- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership, 005_events, 006_space, 007_clues, 008_matrix).
+- Migrazioni automatiche all'avvio: `database/migrations/sqlite/NNN_nome.sql` (001_init, 002_archive, 003_relations, 004_genealogy_ownership, 005_events, 006_space, 007_clues, 008_matrix, 009_knowledge).
 
 ### Principio DRY: entità dichiarative
 
@@ -38,7 +38,7 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 
 - `Core/`: App (kernel, errori JSON/HTML), Router (`{id}` numerico), Request/Response, Controller, View, Database, Migrator,
   Config, Logger, HttpException, **Upload** (immagini verificate in `public/uploads/case-{id}/`, ignorate da git; `.htaccess` blocca gli script), **Schema** (validazione/cast), **Model** (CRUD generico, ricerca, filtri, ordinamento, scope sul caso, controllo ref, `summaries()`), Settings (caso attivo).
-- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero), EventsModel (date obbligatorie secondo il tipo, fine ≥ inizio), RoutesModel (niente percorsi doppi), CluesModel (svelato ≥ scoperto), SuspectsModel (un sospettato per delitto), AlibisModel (fine ≥ inizio, crolla dopo la dichiarazione), MapsModel (cancella l'immagine sostituita/eliminata); CasesModel cancella anche le immagini del caso.
+- `Models/`: CasesModel (chiude la sessione se elimini il caso aperto), PlacesModel (niente luoghi circolari), RelationsModel (etichetta di default), LineagesModel (niente cicli nell'albero), EventsModel (date obbligatorie secondo il tipo, fine ≥ inizio), RoutesModel (niente percorsi doppi), CluesModel (svelato ≥ scoperto), SuspectsModel (un sospettato per delitto), AlibisModel (fine ≥ inizio, crolla dopo la dichiarazione), ChaptersModel (numero unico), KnowledgeModel (una voce per personaggio e informazione), LiesModel (smascherata dopo essere detta, non a sé stessi), MapsModel (cancella l'immagine sostituita/eliminata); CasesModel cancella anche le immagini del caso.
   `Model::for()` restituisce sempre la classe dell'entità richiesta (`self`, non `static`).
 - `Controllers/Api/`: ResourceController (REST generico `/api/{entity}[/{id}]`, `?q=&campo=&sort=&dir=&limit=&offset=&case_id=`),
   SessionController (`GET /api/session`, `PUT /api/session/case`), SearchController (`GET /api/search` indice per Ctrl+K),
@@ -50,7 +50,7 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
 - `core/`: api, dom (h(), emit/on con signal, confirmButton), resource (CRUD + getSchema/getSchemas), form (renderForm con `exclude`, readForm, attachSubmit, showErrors),
   format (formatValue, mappe ref), panel (pannello laterale: lettura/modifica, sezioni figlie), children (sotto-elenchi generici), modal, entity-manager (gestore in modale, usato per i Casi),
   router (SPA dal registro moduli), tabs (schede interne di una vista, persistenti o montate a richiesta), graph (loadVis, loadTimeline — catturano `window.vis` separatamente —, graphTheme, linkMode "trascina per collegare"), chapter-slider (cursore "Stato al capitolo"), palette (Ctrl+K: ricerca fuzzy, comandi, "Crea «x» come …"), help (tasto ?), hotkeys (registro a **pila**: una vista può prendere in prestito un tasto e restituirlo), session (caso aperto), toast, ui (tema/menu, evento theme:changed), prefs (localStorage), assets (loadScript/loadStyle su richiesta).
-- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes).
+- `views/`: dashboard, entity-table (tabella generica; `embedded: true` per usarla dentro una scheda), relations (grafo legami), genealogy (albero gerarchico), ownership (matrice proprietà), timeline (doppia timeline + narrazione), space (+ space-maps: visualizzatore planimetrie; space-routes: calcoli percorrenze e spostamenti), clues (bacheca, catena di custodia), matrix (matrice 5W, registro alibi; usa travelNetwork di space-routes), knowledge (chi sa cosa, mappa delle bugie, scaletta dei capitoli).
 - format.js: formatValue (con prefix/suffix), newLabel(schema) per "Nuovo/Nuova …".
 - `modules/cases.js`: finestra Casi (Alt+C).
 - Eventi globali: `case:changed`, `data:changed {entity, action, record}`, `panel:changed`, `route:changed`, `theme:changed`, `app:error`.
@@ -81,12 +81,16 @@ Tipi di campo: `string, text, int, float, bool, enum, date, datetime, color, ref
    testimone, tenuta Solido/Debole/Falso/Non verificato, capitolo in cui è dichiarato e in cui crolla, verità). Eventi e personaggi li mostrano nel pannello.
    Matrice: Chi / Perché / Cosa / Dove e quando dichiara / Opportunità reale calcolata (sul posto, altrove, impossibile per i tempi di percorrenza, possibile, da verificare); V nasconde il colpevole.
    Registro alibi con filtro per tenuta e controlli: smentito dalla timeline, testimone altrove o coincidente, solido senza testimone, solido ma crolla.
+11. POV e bugie: `chapters` (numero, titolo, punto di vista, quando si svolge, stato, sintesi), `facts` (informazioni vere o false, chi riguarda, capitolo in cui le scopre il lettore),
+   `knowledge` (chi lo sa / lo sospetta, da quale capitolo, come, da chi, lo nasconde), `lies` (chi mente, a chi, cosa dice, verità, perché, detta / smascherata al capitolo, da chi).
+   Chi sa cosa: matrice informazioni × Lettore + personaggi al capitolo scelto, colonna POV evidenziata, ironia drammatica e "il POV sa, il lettore no".
+   Mappa delle bugie: grafo chi mente → a chi (rosse in piedi, grigie smascherate) con cursore capitolo. Capitoli: scaletta con tutto ciò che accade in ogni capitolo
+   (eventi, indizi, rivelazioni, bugie, alibi) e i capitoli ancora senza scheda. I numeri di capitolo degli altri moduli restano interi (nessun ref), la scaletta li unisce.
 
-Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V
+Scorciatoie: Ctrl+K, Alt+C, Alt+1…8, Alt+N, E, Esc, /, ?, Alt+T, Alt+M; grafo L F , . ; albero L U V F ; matrice , . ; timeline R F + - ; planimetrie P F + - ; indizi V , . ; matrice V ; POV e bugie , . F
 
 ## Prossimi step
 
-- **11** Chi sa cosa in quale capitolo + mappa delle bugie e smentite. (Serve un'entità **capitoli**: valutare di introdurla qui e collegarla anche alle fasi dei legami.)
 - **12** Idee orfane con conversione in nodo / asset / evento.
 - **13** Archetipi, tropi, dashboard incongruenze automatica.
 - **14** Esportazione dossier Markdown/PDF + backup.

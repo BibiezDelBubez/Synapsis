@@ -744,6 +744,20 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .w5-alibi:hover { background: var(--sn-hover-bg); }
 .alibi-table td { vertical-align: top; font-size: .85rem; }
 
+/* --- POV e bugie ------------------------------------------------------------------------ */
+.know-table .pov-col { background: color-mix(in srgb, var(--bs-primary) 10%, transparent); }
+.know-table thead th.pov-col { color: var(--bs-primary-text-emphasis); }
+.know-table .reader-col { background: color-mix(in srgb, var(--bs-success) 7%, transparent); }
+.know-later { font-size: .7rem; color: var(--bs-tertiary-color); border: 1px dashed var(--bs-border-color); border-radius: .3rem; padding: 0 .3rem; }
+.know-new { display: inline-block; margin-left: .3rem; font-size: .6rem; text-transform: uppercase; letter-spacing: .03em; color: var(--bs-warning); font-weight: 700; }
+.chapter-table .chapter-row { cursor: pointer; }
+.chapter-table .chapter-row:hover td { background: var(--sn-hover-bg); }
+.chapter-table .chapter-row.missing td { border-bottom-style: dashed; }
+.chapter-mark { font-size: .75rem; padding: .1rem .45rem; border-radius: 1rem; background: var(--bs-secondary-bg); border: 1px solid var(--bs-border-color); white-space: nowrap; }
+.enum-draft { background: rgba(13, 110, 253, .12); border-color: rgba(13, 110, 253, .35); }
+.enum-revised { background: rgba(111, 66, 193, .15); border-color: rgba(111, 66, 193, .4); }
+.enum-final { background: rgba(25, 135, 84, .18); border-color: rgba(25, 135, 84, .45); }
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }

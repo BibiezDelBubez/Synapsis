@@ -17,6 +17,8 @@ return [
         ['entity' => 'ownerships', 'foreign_key' => 'owner_id', 'label' => 'Beni posseduti'],
         ['entity' => 'clues', 'foreign_key' => 'points_to_id', 'label' => 'Indizi che lo indicano'],
         ['entity' => 'alibis', 'foreign_key' => 'character_id', 'label' => 'Alibi'],
+        ['entity' => 'knowledge', 'foreign_key' => 'character_id', 'label' => 'Cosa sa'],
+        ['entity' => 'lies', 'foreign_key' => 'liar_id', 'label' => 'Bugie che dice'],
     ],
 
     'fields' => [
