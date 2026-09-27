@@ -54,6 +54,8 @@ on('case:changed', ({ case: current }) => {
     label.classList.toggle('text-body-secondary', !current);
     dot.style.background = current?.color ?? 'transparent';
     document.title = current ? `${current.title} · Sinapsi` : 'Sinapsi';
+    // Aprendo un caso da una pagina inesistente si torna alla dashboard
+    if (current && router.notFound) router.navigate('/');
 });
 
 // --- Indicatore di stato del server ---------------------------------------------------

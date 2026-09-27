@@ -92,6 +92,25 @@ async function loadRefOptions(select, field, value) {
     }
 }
 
+const previewNumber = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 4 });
+const previewCurrency = new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 });
+
+/** Mentre si scrive un numero grande (da 1.000 in su) mostra come verrà letto: "= 50.000.000,00 €". */
+function numberPreview(field, input) {
+    const out = h('div', { class: 'form-text number-preview' });
+    const update = () => {
+        const n = input.value === '' ? NaN : Number(input.value);
+        const show = Number.isFinite(n) && (Math.abs(n) >= 1000 || field.format === 'currency');
+        out.textContent = show
+            ? `= ${field.format === 'currency' ? previewCurrency.format(n) : `${field.prefix ?? ''}${previewNumber.format(n)}${field.suffix ? ` ${field.suffix}` : ''}`}`
+            : '';
+        out.hidden = !show;
+    };
+    input.addEventListener('input', update);
+    update();
+    return out;
+}
+
 /**
  * @param {object} schema
  * @param {object|null} record  valori iniziali (null = valori predefiniti)
@@ -112,6 +131,7 @@ export function renderForm(schema, record = null, { exclude = [] } = {}) {
             field.type === 'bool' ? null : h('label', { class: 'form-label', for: id },
                 field.label, field.required ? h('span', { class: 'text-danger ms-1' }, '*') : null),
             control,
+            ['int', 'float'].includes(field.type) ? numberPreview(field, control) : null,
             h('div', { class: 'invalid-feedback', dataset: { errorFor: name } }),
             field.help ? h('div', { class: 'form-text' }, field.help) : null,
         ));

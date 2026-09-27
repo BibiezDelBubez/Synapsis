@@ -65,6 +65,7 @@ export async function mount(container, { module }) {
     const state = {
         truth: prefs.get('genealogy.truth', '1') === '1',
         family: '',
+        showAll: prefs.getJSON('genealogy.all', false),
         characters: [],
         lineages: [],
         unions: [],
@@ -81,6 +82,10 @@ export async function mount(container, { module }) {
         icon('fa-arrow-down-long', 'me-1'), 'Genitore → figlio');
     const unionBtn = h('button', { type: 'button', class: 'btn btn-sm btn-outline-primary', title: 'Trascina tra i due partner (U)', onclick: () => toggleLink('union') },
         icon('fa-ring', 'me-1'), 'Unione');
+    const allInput = h('input', { type: 'checkbox', class: 'form-check-input', role: 'switch', checked: state.showAll,
+        onchange: () => { state.showAll = allInput.checked; prefs.setJSON('genealogy.all', state.showAll); needsFit = true; draw(); } });
+    const allSwitch = h('label', { class: 'form-check form-switch mb-0 small', title: 'Mostra anche chi non ha ancora parentele, per collegarlo trascinando' },
+        allInput, h('span', { class: 'form-check-label' }, 'Senza parentele'));
     const newBtn = h('button', { type: 'button', class: 'btn btn-sm btn-primary', title: 'Alt+N', onclick: () => create('lineages') },
         icon('fa-plus', 'me-1'), 'Nuova filiazione');
 
@@ -99,7 +104,7 @@ export async function mount(container, { module }) {
         h('div', { class: 'graph-toolbar' },
             h('div', { class: 'd-flex align-items-center gap-2' }, icon('fa-crown', 'text-body-secondary'), familySelect),
             h('div', { class: 'btn-group' }, truthButtons.truth, truthButtons.public),
-            h('div', { class: 'd-flex gap-2 ms-auto' }, parentBtn, unionBtn)),
+            h('div', { class: 'd-flex align-items-center gap-2 ms-auto' }, allSwitch, parentBtn, unionBtn)),
         stage);
 
     const tabs = viewTabs([
@@ -171,6 +176,8 @@ export async function mount(container, { module }) {
             unions.forEach((u) => { if (core.has(u.partner_a) || core.has(u.partner_b)) { ids.add(u.partner_a); ids.add(u.partner_b); } });
         } else {
             ids = new Set([...lineages.flatMap((l) => [l.parent_id, l.child_id]), ...unions.flatMap((u) => [u.partner_a, u.partner_b])]);
+            // Albero ancora vuoto, oppure richiesta esplicita: tutti i personaggi, così si possono collegare trascinando (L / U)
+            if (state.showAll || !ids.size) state.characters.forEach((c) => ids.add(c.id));
         }
         ids = [...ids].filter((id) => byId.has(id));
         const shown = new Set(ids);

@@ -40,6 +40,8 @@ function notFound(container, path) {
         h('a', { href: url('/'), class: 'btn btn-sm btn-outline-secondary mt-2', dataset: { link: '' } }, 'Torna alla dashboard')));
 }
 
+let showingNotFound = false;
+
 async function render() {
     const token = ++renderToken;
     const container = document.getElementById('app-content');
@@ -51,6 +53,7 @@ async function render() {
     current = module;
     highlight(module);
 
+    showingNotFound = !module;
     if (!module) {
         notFound(container, path);
         return;
@@ -72,6 +75,10 @@ export const router = {
     modules: enabled,
     get current() {
         return current;
+    },
+    /** true se è mostrata la pagina «Nessun modulo a …». */
+    get notFound() {
+        return showingNotFound;
     },
     navigate(path) {
         const target = url(path);
