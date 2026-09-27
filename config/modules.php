@@ -30,7 +30,7 @@ return [
     ['id' => 'spazio',     'label' => 'Percorsi e planimetrie', 'icon' => 'fa-map-location-dot',     'group' => 'Tempo e spazio', 'path' => '/spazio',      'view' => 'space',        'entity' => 'routes',     'step' => 8,  'enabled' => true],
 
     ['id' => 'indizi',     'label' => 'Indizi e prove',         'icon' => 'fa-magnifying-glass',     'group' => 'Indagine',       'path' => '/indizi',      'view' => 'clues',        'entity' => 'clues',      'step' => 9,  'enabled' => true, 'quick_create' => true],
-    ['id' => 'matrice',    'label' => 'Matrice e alibi',        'icon' => 'fa-table-cells',          'group' => 'Indagine',       'path' => '/matrice',     'view' => 'matrix',       'step' => 10, 'enabled' => false],
+    ['id' => 'matrice',    'label' => 'Matrice e alibi',        'icon' => 'fa-table-cells',          'group' => 'Indagine',       'path' => '/matrice',     'view' => 'matrix',       'entity' => 'suspects',   'step' => 10, 'enabled' => true],
     ['id' => 'conoscenza', 'label' => 'POV e bugie',            'icon' => 'fa-eye',                  'group' => 'Indagine',       'path' => '/conoscenza',  'view' => 'knowledge',    'step' => 11, 'enabled' => false],
 
     ['id' => 'idee',       'label' => 'Idee orfane',            'icon' => 'fa-lightbulb',            'group' => 'Scrittura',      'path' => '/idee',        'view' => 'ideas',        'step' => 12, 'enabled' => false],

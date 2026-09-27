@@ -728,6 +728,22 @@ body:not(.panel-open) .app-panel { border-left: 0; }
     .chain-list { width: auto; max-height: 30vh; }
 }
 
+/* --- Matrice 5W e registro alibi ----------------------------------------------------- */
+.enum-solid { background: rgba(25, 135, 84, .18); border-color: rgba(25, 135, 84, .45); }
+.enum-weak, .enum-medium, .enum-possible { background: rgba(255, 193, 7, .16); border-color: rgba(255, 193, 7, .45); }
+.enum-strong, .enum-easy { background: rgba(220, 53, 69, .2); border-color: rgba(220, 53, 69, .5); }
+.enum-false { background: rgba(220, 53, 69, .16); border-color: rgba(220, 53, 69, .45); }
+.w5-table td, .w5-table th { vertical-align: top; }
+.w5-table .suspect-row, .alibi-table .alibi-row { cursor: pointer; }
+.w5-table .suspect-row:hover td, .w5-table .suspect-row:hover th, .alibi-table .alibi-row:hover td { background: var(--sn-hover-bg); }
+.w5-table .suspect-row.culprit th { box-shadow: inset 3px 0 0 var(--bs-danger); }
+.w5-cell { min-width: 150px; max-width: 320px; }
+.w5-text { font-size: .8rem; margin-top: .3rem; white-space: pre-line; }
+.w5-alibi { font-size: .82rem; padding: .15rem .25rem; border-radius: .3rem; }
+.w5-alibi + .w5-alibi { margin-top: .35rem; }
+.w5-alibi:hover { background: var(--sn-hover-bg); }
+.alibi-table td { vertical-align: top; font-size: .85rem; }
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }

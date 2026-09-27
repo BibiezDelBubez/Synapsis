@@ -19,6 +19,8 @@ return [
 
     'children' => [
         ['entity' => 'event_participants', 'foreign_key' => 'event_id', 'label' => 'Chi è coinvolto'],
+        ['entity' => 'suspects', 'foreign_key' => 'crime_event_id', 'label' => 'Sospettati'],
+        ['entity' => 'alibis', 'foreign_key' => 'event_id', 'label' => 'Alibi'],
     ],
 
     'fields' => [

@@ -16,6 +16,7 @@ return [
         ['entity' => 'event_participants', 'foreign_key' => 'character_id', 'label' => 'Eventi'],
         ['entity' => 'ownerships', 'foreign_key' => 'owner_id', 'label' => 'Beni posseduti'],
         ['entity' => 'clues', 'foreign_key' => 'points_to_id', 'label' => 'Indizi che lo indicano'],
+        ['entity' => 'alibis', 'foreign_key' => 'character_id', 'label' => 'Alibi'],
     ],
 
     'fields' => [
