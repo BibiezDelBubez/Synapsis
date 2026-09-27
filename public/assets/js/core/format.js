@@ -18,7 +18,7 @@ const refCache = new Map();
 export function loadRefMap(entity) {
     if (!refCache.has(entity)) {
         refCache.set(entity, Promise.all([resource(entity).list({ limit: 1000 }), getSchema(entity)])
-            .then(([{ data }, schema]) => new Map(data.map((row) => [row.id, row[schema.title_field]])))
+            .then(([{ data }, schema]) => new Map(data.map((row) => [row.id, row[schema.title_field] ?? row._title ?? `#${row.id}`])))
             .catch(() => new Map()));
     }
     return refCache.get(entity);

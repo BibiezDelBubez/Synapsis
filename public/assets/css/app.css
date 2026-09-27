@@ -758,6 +758,39 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .enum-revised { background: rgba(111, 66, 193, .15); border-color: rgba(111, 66, 193, .4); }
 .enum-final { background: rgba(25, 135, 84, .18); border-color: rgba(25, 135, 84, .45); }
 
+/* --- Idee orfane ----------------------------------------------------------------------- */
+.idea-board { overflow: auto; }
+.idea-capture-box { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; padding: .6rem .75rem; border: 1px solid var(--bs-border-color); border-radius: var(--sn-radius); background: var(--bs-tertiary-bg); }
+.idea-capture-icon { color: var(--bs-warning); font-size: 1.1rem; }
+.idea-capture { font-size: 1rem; }
+.idea-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .75rem; align-content: start; padding-bottom: 1rem; }
+.idea-card {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-left: 3px solid var(--bs-warning);
+    border-radius: .5rem;
+    padding: .65rem .75rem;
+    font-size: .85rem;
+    cursor: pointer;
+}
+.idea-card:hover, .idea-card:focus { border-color: var(--bs-secondary-color); border-left-color: var(--bs-warning); outline: none; }
+.idea-card.selected { box-shadow: 0 0 0 2px var(--bs-primary); }
+.idea-card.status-parked { border-left-color: var(--bs-info); }
+.idea-card.status-used { border-left-color: var(--bs-success); opacity: .8; }
+.idea-card.status-discarded { border-left-color: var(--bs-secondary-color); opacity: .55; }
+.idea-card.status-discarded .idea-title { text-decoration: line-through; }
+.idea-body { color: var(--bs-secondary-color); white-space: pre-line; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.idea-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .6rem; font-size: .72rem; color: var(--bs-secondary-color); }
+.idea-tag-label { color: var(--bs-info-text-emphasis); }
+.chip.idea-tag { text-decoration: none; }
+.idea-converted { font-size: .78rem; color: var(--bs-success-text-emphasis); }
+.idea-actions { display: flex; align-items: center; gap: .25rem; margin-top: auto; padding-top: .25rem; }
+.idea-actions .idea-convert { width: auto; flex: 1; min-width: 0; max-width: 13rem; }
+.idea-capture-box .btn { white-space: nowrap; }
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }

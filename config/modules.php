@@ -33,7 +33,7 @@ return [
     ['id' => 'matrice',    'label' => 'Matrice e alibi',        'icon' => 'fa-table-cells',          'group' => 'Indagine',       'path' => '/matrice',     'view' => 'matrix',       'entity' => 'suspects',   'step' => 10, 'enabled' => true],
     ['id' => 'conoscenza', 'label' => 'POV e bugie',            'icon' => 'fa-eye',                  'group' => 'Indagine',       'path' => '/conoscenza',  'view' => 'knowledge',    'entity' => 'facts',      'step' => 11, 'enabled' => true, 'quick_create' => true],
 
-    ['id' => 'idee',       'label' => 'Idee orfane',            'icon' => 'fa-lightbulb',            'group' => 'Scrittura',      'path' => '/idee',        'view' => 'ideas',        'step' => 12, 'enabled' => false],
+    ['id' => 'idee',       'label' => 'Idee orfane',            'icon' => 'fa-lightbulb',            'group' => 'Scrittura',      'path' => '/idee',        'view' => 'ideas',        'entity' => 'ideas',      'step' => 12, 'enabled' => true, 'quick_create' => true],
     ['id' => 'coerenza',   'label' => 'Consistency check',      'icon' => 'fa-triangle-exclamation', 'group' => 'Scrittura',      'path' => '/coerenza',    'view' => 'consistency',  'step' => 13, 'enabled' => false],
     ['id' => 'dossier',    'label' => 'Dossier del caso',       'icon' => 'fa-file-export',          'group' => 'Scrittura',      'path' => '/dossier',     'view' => 'dossier',      'step' => 14, 'enabled' => false],
 ];
