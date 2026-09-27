@@ -635,6 +635,99 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .moves-table tr.move-impossible td { background: color-mix(in srgb, var(--bs-danger) 9%, transparent); }
 .moves-table tr.move-tight td { background: color-mix(in srgb, var(--bs-warning) 7%, transparent); }
 
+/* --- Indizi: bacheca e catena di custodia ------------------------------------------- */
+.enum-real { background: rgba(25, 135, 84, .18); border-color: rgba(25, 135, 84, .45); }
+.enum-red_herring { background: rgba(220, 53, 69, .16); border-color: rgba(220, 53, 69, .45); }
+.enum-misread { background: rgba(255, 193, 7, .16); border-color: rgba(255, 193, 7, .45); }
+.clue-dot { display: inline-block; width: .65rem; height: .65rem; border-radius: 50%; margin-right: .5rem; flex: none; }
+.dot-real { background: #40c057; }
+.dot-red_herring { background: #fa5252; }
+.dot-misread { background: #fcc419; }
+.clue-board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; overflow: auto; }
+.clue-board.reader { grid-template-columns: minmax(0, 720px); justify-content: center; }
+.clue-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--sn-radius);
+    background: var(--bs-tertiary-bg);
+}
+.clue-column.drop-target { border-color: var(--bs-primary); box-shadow: inset 0 0 0 1px var(--bs-primary); }
+.clue-column-head { padding: .6rem .75rem; border-bottom: 1px solid var(--bs-border-color); }
+.clue-column-body { flex: 1; overflow: auto; padding: .6rem; display: flex; flex-direction: column; gap: .5rem; }
+.clue-card {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: .5rem;
+    padding: .55rem .65rem;
+    font-size: .85rem;
+    cursor: pointer;
+}
+.clue-card:hover, .clue-card:focus { border-color: var(--bs-secondary-color); outline: none; }
+.clue-card.selected { box-shadow: 0 0 0 2px var(--bs-primary); }
+.clue-card.not-yet { opacity: .45; border-style: dashed; }
+.clue-card.dragging { opacity: .4; }
+.clue-kind { color: var(--bs-secondary-color); width: 1.1rem; text-align: center; }
+.clue-importance { color: var(--bs-warning); font-size: .6rem; letter-spacing: .05rem; white-space: nowrap; }
+.clue-meaning { font-size: .78rem; margin-top: .3rem; }
+.clue-truth span { color: var(--bs-success-text-emphasis); font-weight: 600; }
+.clue-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .75rem; margin-top: .45rem; font-size: .72rem; color: var(--bs-secondary-color); }
+.clue-meta .badge { font-size: .65rem; }
+.chain-view { flex-direction: row; gap: .75rem; }
+.chain-list {
+    width: 280px;
+    flex: none;
+    overflow: auto;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--sn-radius);
+    background: var(--bs-tertiary-bg);
+    padding: .35rem;
+}
+.chain-item {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    color: inherit;
+    padding: .4rem .5rem;
+    border-radius: .35rem;
+    font-size: .85rem;
+}
+.chain-item:hover { background: var(--sn-hover-bg); }
+.chain-item.active { background: var(--bs-primary-bg-subtle); }
+.chain-detail { flex: 1; min-width: 0; overflow: auto; position: relative; }
+.chain-steps { list-style: none; padding: 0; margin: 0; position: relative; }
+.chain-steps::before { content: ""; position: absolute; left: 1rem; top: .5rem; bottom: .5rem; width: 2px; background: var(--bs-border-color); }
+.chain-step { position: relative; display: flex; gap: .75rem; padding: .5rem .5rem .75rem 0; border-radius: .4rem; cursor: pointer; }
+.chain-step:hover, .chain-step:focus { background: var(--sn-hover-bg); outline: none; }
+.chain-icon {
+    position: relative;
+    z-index: 1;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bs-secondary-bg);
+    border: 2px solid var(--bs-border-color);
+    font-size: .8rem;
+}
+.chain-step.has-warning .chain-icon { border-color: var(--bs-warning); color: var(--bs-warning); }
+.chain-step.has-danger .chain-icon { border-color: var(--bs-danger); color: var(--bs-danger); }
+.chain-step.secret .chain-icon { border-style: dashed; }
+.chain-issue { font-size: .76rem; margin-top: .2rem; }
+@media (max-width: 991.98px) {
+    .clue-board { grid-template-columns: minmax(0, 1fr); }
+    .chain-view { flex-direction: column; }
+    .chain-list { width: auto; max-height: 30vh; }
+}
+
 /* --- Schermi stretti: il menu si sovrappone ------------------------------ */
 @media (max-width: 767.98px) {
     body, body.sidebar-collapsed, body.panel-open { --sn-sb: 0px; --sn-pn: 0px; }
