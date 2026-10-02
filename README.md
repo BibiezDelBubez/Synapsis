@@ -301,3 +301,5 @@ Tutte le librerie sono copiate in `public/vendor/` (versioni in `public/vendor/V
 | vis-network 10, vis-timeline 8 | Apache 2.0 / MIT (a scelta) |
 | Fuse.js 7 | Apache 2.0 |
 | marked 18 | MIT |
+
+Immagini: l'illustrazione di Sherlock Holmes della pagina «non trovata» è di Delapouite ([game-icons.net](https://game-icons.net)), licenza CC BY 3.0; dettagli in `public/assets/img/CREDITS.md`.

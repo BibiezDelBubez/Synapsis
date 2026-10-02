@@ -6,8 +6,9 @@
  * Navigazione: link con attributo data-link, router.navigate('/percorso'), Alt+1…9.
  */
 import { url } from './api.js';
-import { emit, h, icon } from './dom.js';
+import { emit, h } from './dom.js';
 import { hotkeys } from './hotkeys.js';
+import { renderNotFound } from './not-found.js';
 
 const BASE = new URL(url('/'), location.origin).pathname.replace(/\/$/, '');
 const modules = JSON.parse(document.getElementById('app-modules')?.textContent || '[]');
@@ -34,10 +35,7 @@ function highlight(module) {
 }
 
 function notFound(container, path) {
-    container.replaceChildren(h('div', { class: 'empty-state' },
-        icon('fa-compass', 'fa-2x mb-2 text-body-tertiary'),
-        h('div', { class: 'fw-semibold' }, `Nessun modulo a «${path}»`),
-        h('a', { href: url('/'), class: 'btn btn-sm btn-outline-secondary mt-2', dataset: { link: '' } }, 'Torna alla dashboard')));
+    renderNotFound(container, path);
 }
 
 let showingNotFound = false;
