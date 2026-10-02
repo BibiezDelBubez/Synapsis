@@ -885,13 +885,14 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 /* Pannello «notturno» con colori propri, uguale in tema chiaro e scuro (gli stessi dell'illustrazione) */
 .not-found {
     --nf-night: #1f364c; --nf-deep: #172e40; --nf-lamp: #edba7d; --nf-amber: #e5ab5c; --nf-ink: #c9dbe8;
-    max-width: 1000px; margin: 1.5rem auto; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    align-items: center; background: var(--nf-night); color: var(--nf-ink); border-radius: calc(var(--sn-radius) * 2);
-    overflow: hidden; box-shadow: 0 1.5rem 3rem -1.5rem rgba(0, 0, 0, .6);
+    min-height: 100%; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center;
+    gap: 0 2rem; padding: 2rem clamp(1rem, 4vw, 4rem); background: var(--nf-night); color: var(--nf-ink);
 }
-.nf-scene { align-self: stretch; display: flex; align-items: flex-end; }
-.nf-scene svg { display: block; width: 100%; height: auto; }
-.nf-text { padding: 2rem 2.25rem 2rem .5rem; }
+/* La notte riempie tutta l'area dei contenuti, senza bordi */
+.app-content:has(> .not-found) { padding: 0; background: #1f364c; }
+.nf-scene { display: flex; justify-content: flex-end; }
+.nf-scene svg, .nf-scene img { display: block; width: 100%; max-width: 760px; max-height: calc(100vh - 8rem); height: auto; }
+.nf-text { max-width: 30rem; }
 .nf-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--nf-amber); margin-bottom: .6rem; }
 .nf-title { font-size: 1.9rem; font-weight: 700; line-height: 1.15; color: #f6e7cf; margin-bottom: .6rem; text-wrap: balance; }
 .nf-lead { font-size: .95rem; margin-bottom: 1.4rem; }
@@ -906,9 +907,10 @@ body:not(.panel-open) .app-panel { border-left: 0; }
 .nf-actions .btn-night { border-color: rgba(201, 219, 232, .45); color: var(--nf-ink); }
 .nf-actions .btn-night:hover, .nf-actions .btn-night:focus-visible { background: rgba(201, 219, 232, .12); color: #fff; border-color: var(--nf-ink); }
 @media (max-width: 991.98px) {
-    .not-found { grid-template-columns: minmax(0, 1fr); margin: .5rem auto; }
-    .nf-scene { max-width: 560px; margin: 0 auto; width: 100%; }
-    .nf-text { padding: .5rem 1.5rem 1.75rem; }
+    .not-found { grid-template-columns: minmax(0, 1fr); align-content: center; padding-block: 1rem 2rem; }
+    .nf-scene { justify-content: center; }
+    .nf-scene svg, .nf-scene img { max-width: 560px; max-height: 55vh; }
+    .nf-text { margin: 0 auto; }
 }
 
 /* Animazioni: orme che compaiono una dopo l'altra fino a perdersi nel buio, stelle, lampione che tremola */
