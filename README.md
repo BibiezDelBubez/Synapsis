@@ -302,4 +302,4 @@ Tutte le librerie sono copiate in `public/vendor/` (versioni in `public/vendor/V
 | Fuse.js 7 | Apache 2.0 |
 | marked 18 | MIT |
 
-Immagini: l'illustrazione di Sherlock Holmes della pagina «non trovata» è di Delapouite ([game-icons.net](https://game-icons.net)), licenza CC BY 3.0; dettagli in `public/assets/img/CREDITS.md`.
+Immagini: l'illustrazione della pagina «non trovata» (`public/assets/img/detective.svg`) è indicata in `public/assets/img/CREDITS.md` con fonte e licenza.

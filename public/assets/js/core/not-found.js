@@ -1,10 +1,10 @@
 /**
- * Pagina «non trovata» della SPA: Sherlock Holmes e una citazione casuale su ciò che manca,
- * è scomparso o non c'è più. Le citazioni di Conan Doyle e Poe sono di pubblico dominio
- * (traduzione libera); le altre voci sono fatti storici.
+ * Pagina «non trovata» della SPA: il detective sotto il lampione esamina le orme, che si perdono
+ * nel buio oltre la luce; accanto, una citazione casuale su ciò che manca, è scomparso o non c'è più.
+ * Le citazioni di Conan Doyle e Poe sono di pubblico dominio (traduzione libera); le altre sono fatti storici.
  *
- * Illustrazione: «Sherlock Holmes» di Delapouite, game-icons.net, licenza CC BY 3.0
- * (vedi public/assets/img/CREDITS.md).
+ * L'illustrazione (public/assets/img/detective.svg) viene inserita nella pagina come SVG,
+ * così il CSS può animarne le parti (classi nf-*: orme, stelle, luce del lampione).
  */
 import { url } from './api.js';
 import { h, icon } from './dom.js';
@@ -33,22 +33,50 @@ function pick() {
     return QUOTES[i];
 }
 
+let artwork = null; // testo dell'SVG, scaricato una volta sola
+
+async function loadArtwork(target) {
+    try {
+        artwork ??= fetch(url('assets/img/detective.svg')).then((r) => (r.ok ? r.text() : Promise.reject(new Error(r.status))));
+        target.innerHTML = await artwork; // file statico dell'app, non contenuto dell'utente
+    } catch {
+        artwork = null;
+        target.replaceChildren(h('img', { src: url('assets/img/detective.svg'), alt: '' }));
+    }
+}
+
 export function renderNotFound(container, path) {
     const text = h('p', { class: 'nf-quote-text' });
     const source = h('footer', { class: 'nf-quote-source' });
+    const quote = h('blockquote', { class: 'nf-quote', 'aria-live': 'polite' }, text, source);
     const show = () => {
         const q = pick();
         text.textContent = q.text;
         source.textContent = q.source;
     };
+    const scene = h('div', { class: 'nf-scene' });
+    const page = h('section', { class: 'not-found' },
+        scene,
+        h('div', { class: 'nf-text' },
+            h('div', { class: 'nf-eyebrow' }, 'Errore 404 · pista interrotta'),
+            h('h1', { class: 'nf-title' }, 'Le orme finiscono qui.'),
+            h('p', { class: 'nf-lead' }, 'Nessuna pagina a ', h('code', {}, path),
+                '. Oltre la luce del lampione non c\'è più traccia: forse non è mai esistita, o qualcuno l\'ha fatta sparire.'),
+            quote,
+            h('div', { class: 'nf-actions' },
+                h('a', { href: url('/'), class: 'btn btn-sm btn-lamp', dataset: { link: '' } }, icon('fa-house', 'me-1'), 'Torna alla dashboard'),
+                h('button', { type: 'button', class: 'btn btn-sm btn-night', onclick: () => anotherMystery() }, icon('fa-shuffle', 'me-1'), 'Un altro mistero'))));
+
+    // Il lampione tremola e, al buio, cambia il mistero
+    function anotherMystery() {
+        page.classList.remove('flicker');
+        void page.offsetWidth; // riavvia l'animazione
+        page.classList.add('flicker');
+        quote.classList.add('swapping');
+        setTimeout(() => { show(); quote.classList.remove('swapping'); }, 250);
+    }
+
     show();
-    container.replaceChildren(h('div', { class: 'not-found' },
-        h('div', { class: 'nf-art', role: 'img', 'aria-label': 'Sherlock Holmes con la lente', style: `--nf-img:url("${url('assets/img/sherlock-holmes.svg')}")` }),
-        h('div', { class: 'nf-code' }, '404'),
-        h('h1', { class: 'h4 mb-1' }, 'Qui non c\'è niente'),
-        h('p', { class: 'text-body-secondary mb-4' }, 'Nessuna pagina a ', h('code', {}, path), '. Forse non è mai esistita, o qualcuno l\'ha fatta sparire.'),
-        h('blockquote', { class: 'nf-quote' }, text, source),
-        h('div', { class: 'd-flex gap-2 justify-content-center flex-wrap mt-3' },
-            h('a', { href: url('/'), class: 'btn btn-sm btn-primary', dataset: { link: '' } }, icon('fa-house', 'me-1'), 'Torna alla dashboard'),
-            h('button', { type: 'button', class: 'btn btn-sm btn-outline-secondary', onclick: show }, icon('fa-shuffle', 'me-1'), 'Un altro mistero'))));
+    container.replaceChildren(page);
+    loadArtwork(scene);
 }

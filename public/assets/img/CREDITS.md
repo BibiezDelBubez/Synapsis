@@ -1,3 +1,3 @@
 # Crediti delle immagini
 
-- `sherlock-holmes.svg` — «Sherlock Holmes» di [Delapouite](https://delapouite.com), da [game-icons.net](https://game-icons.net/1x1/delapouite/sherlock-holmes.html), licenza [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Modifiche: rimosso lo sfondo, colore impostato dal tema.
+- `detective.svg` — detective con la lente sotto un lampione (pagina «non trovata»). Fonte e licenza: **da indicare** (file fornito dall'autore del progetto, esportato da Adobe Illustrator). Modifiche: rimossi i livelli vuoti, ritagliata la scena, aggiunte le classi `nf-*` per le animazioni.
