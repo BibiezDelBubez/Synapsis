@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="110 30 520 425" role="img" aria-label="Un investigatore esamina con la lente le impronte sotto un lampione; oltre la luce le orme si perdono nel buio">
-<!-- Scena «detective sotto il lampione» (vedi public/assets/img/CREDITS.md). Classi nf-* usate da app.css per le animazioni della pagina 404. -->
+<!-- Scena «detective sotto il lampione». Classi nf-* usate da app.css per le animazioni della pagina 404. -->
 <g class="nf-sky">
 <rect x="-66.993" y="-45.011" fill="#1F364C" width="864.265" height="576.173" />
 <path fill="#172E40" d="M419.875,112.842H256.921c-8.472,0-15.341-6.869-15.341-15.341l0,0 c0.063-8.434,6.907-15.24,15.341-15.24h162.84c8.472,0,15.341,6.869,15.341,15.341l0,0 C435.051,105.998,428.259,112.779,419.875,112.842z" />

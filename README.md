@@ -301,5 +301,3 @@ Tutte le librerie sono copiate in `public/vendor/` (versioni in `public/vendor/V
 | vis-network 10, vis-timeline 8 | Apache 2.0 / MIT (a scelta) |
 | Fuse.js 7 | Apache 2.0 |
 | marked 18 | MIT |
-
-Immagini: l'illustrazione della pagina «non trovata» (`public/assets/img/detective.svg`) è indicata in `public/assets/img/CREDITS.md` con fonte e licenza.
